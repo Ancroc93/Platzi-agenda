@@ -1,0 +1,7 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+
+.platzi-logo-accent {
+  filter: brightness(0) saturate(100%) invert(74%) sepia(89%) saturate(1858%) hue-rotate(97deg) brightness(97%) contrast(103%);
+}
