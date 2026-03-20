@@ -182,7 +182,7 @@ export function AppTopBar({ isHidden }: { isHidden?: boolean }) {
       </div>
 
       <div className="flex md:hidden h-16 items-center justify-between px-4">
-        <a href="/" className="flex items-center gap-2 min-w-0" aria-label="Platzi">
+        <a href={import.meta.env.BASE_URL} className="flex items-center gap-2 min-w-0" aria-label="Platzi">
           <img
             src="https://static.platzi.com/media/platzi-isotipo@2x.png"
             alt=""

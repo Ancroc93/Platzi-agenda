@@ -944,7 +944,9 @@ export const router = createBrowserRouter([
       { path: "*", Component: () => <div className="p-8 text-white">404 No encontrado</div> },
     ],
   },
-]);
+], {
+  basename: import.meta.env.BASE_URL,
+});
 
 export default function App() {
   return <RouterProvider router={router} />;
