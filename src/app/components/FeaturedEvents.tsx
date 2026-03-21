@@ -91,7 +91,7 @@ export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent
           type="button"
           onClick={() => scrollByCards('left')}
           aria-label={t('carouselPrev')}
-          className="hidden md:flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-2xl bg-[#13171B]/10 text-white/60 hover:text-white hover:bg-[#13171B]/35 transition-all backdrop-blur-sm pointer-events-auto opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+          className="hidden md:flex items-center justify-center absolute left-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-xl bg-[#1C2230]/60 text-white/60 hover:text-white hover:bg-[#1C2230] transition-all backdrop-blur-sm pointer-events-auto opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -99,7 +99,7 @@ export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent
           type="button"
           onClick={() => scrollByCards('right')}
           aria-label={t('carouselNext')}
-          className="hidden md:flex items-center justify-center absolute right-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-2xl bg-[#13171B]/10 text-white/60 hover:text-white hover:bg-[#13171B]/35 transition-all backdrop-blur-sm pointer-events-auto opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+          className="hidden md:flex items-center justify-center absolute right-2 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-xl bg-[#1C2230]/60 text-white/60 hover:text-white hover:bg-[#1C2230] transition-all backdrop-blur-sm pointer-events-auto opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
@@ -173,14 +173,14 @@ export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent
                 <div className="flex items-center gap-3 mb-4">
                   {isPlatziLive ? (
                     <>
-                      <div className="w-9 h-9 rounded-full bg-[#1A2534] border-2 border-indigo-900/50 p-1.5 flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(123,232,142,0.15)]">
+                      <div className="w-9 h-9 rounded-full bg-[#1C2230] border border-[#314158]/50 p-1.5 flex items-center justify-center shrink-0">
                         <img src="https://static.platzi.com/media/platzi-isotipo@2x.png" alt="Platzi" className="w-full h-full object-contain platzi-logo-accent" />
                       </div>
                       <p className="text-white text-sm font-semibold">Team Platzi</p>
                     </>
                   ) : (
                     <>
-                      <div className="w-9 h-9 rounded-full bg-slate-700 shrink-0 overflow-hidden border-2 border-slate-600">
+                      <div className="w-9 h-9 rounded-full bg-[#1C2230] shrink-0 overflow-hidden border border-[#314158]/50">
                         {/* Mock avatar */}
                         <img src={`https://i.pravatar.cc/150?u=${event.id}`} alt={event.instructor || "Instructor"} className="w-full h-full object-cover" />
                       </div>

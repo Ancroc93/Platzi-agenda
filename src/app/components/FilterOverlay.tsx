@@ -15,12 +15,6 @@ const DIVULGACION_CATEGORIES: EventCategory[] = [
   'Platzi CONF Charla',
 ];
 
-const PROMOCION_CATEGORIES: EventCategory[] = [
-  'Platzi Gratis',
-  'Descuentos y promociones',
-  'Platzi CONF',
-];
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Props
 // ─────────────────────────────────────────────────────────────────────────────
@@ -30,8 +24,6 @@ interface FilterOverlayProps {
   onClose: () => void;
   filterCategories: EventCategory[];
   setFilterCategories: (cats: EventCategory[]) => void;
-  filterPago: boolean | null;
-  setFilterPago: (val: boolean | null) => void;
   filterSchools: string[];
   setFilterSchools: (schools: string[]) => void;
   availableSchools: string[];
@@ -46,8 +38,6 @@ export const FilterOverlay = ({
   onClose,
   filterCategories,
   setFilterCategories,
-  filterPago,
-  setFilterPago,
   filterSchools,
   setFilterSchools,
   availableSchools,
@@ -75,14 +65,10 @@ export const FilterOverlay = ({
 
   const clearAll = () => {
     setFilterCategories([]);
-    setFilterPago(null);
     setFilterSchools([]);
   };
 
-  const activeFiltersCount =
-    filterCategories.length +
-    (filterPago !== null ? 1 : 0) +
-    filterSchools.length;
+  const activeFiltersCount = filterCategories.length + filterSchools.length;
 
   const CategoryCheckbox = ({ cat }: { cat: EventCategory }) => {
     const isSelected = filterCategories.includes(cat);
@@ -137,7 +123,7 @@ export const FilterOverlay = ({
 
         {/* Categorías */}
         <section>
-          <h3 className="text-white font-bold text-base leading-snug transition-colors mb-4">Categorías</h3>
+          <h3 className="text-[10px] font-bold text-[#898F9D] uppercase tracking-wider mb-4">Categorías</h3>
           <div className="space-y-3">
             {DIVULGACION_CATEGORIES.map(cat => (
               <CategoryCheckbox key={cat} cat={cat} />
@@ -148,7 +134,7 @@ export const FilterOverlay = ({
         {/* Escuelas */}
         {availableSchools.length > 0 && (
           <section>
-            <h3 className="text-white font-bold text-base leading-snug transition-colors mb-4">Escuelas</h3>
+            <h3 className="text-[10px] font-bold text-[#898F9D] uppercase tracking-wider mb-4">Escuelas</h3>
             <div className="space-y-3 pb-8">
               {availableSchools.map(school => {
                 const isSelected = filterSchools.includes(school);

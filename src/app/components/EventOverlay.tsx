@@ -259,13 +259,18 @@ const OverlayContent = ({ event, onClose }: { event: PlatziEvent, onClose: () =>
           )}
 
           {event.instructor && (
-            <div className="p-4 rounded-xl bg-[#1C2230]/60 border border-[#1D293D] flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-[#1C2230] border border-[#1D293D] overflow-hidden flex-shrink-0 flex items-center justify-center">
-                <span className="text-lg text-[#898F9D] font-bold">{event.instructor.charAt(0)}</span>
-              </div>
-              <div>
-                <h4 className="text-white font-medium text-sm">{event.instructor}</h4>
-                <p className="text-xs text-[#898F9D] mt-0.5">{event.instructorRole}</p>
+            <div>
+              <h4 className="text-[10px] font-bold text-[#898F9D] mb-3 uppercase tracking-wider">Instructor</h4>
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-[#11171B] border border-[#314158]/50">
+                <div className="w-10 h-10 rounded-full bg-[#0D0F12] border border-[#314158]/50 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                  <span className="text-base text-[#00ED80] font-bold">{event.instructor.charAt(0)}</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[#F1F5F9] font-bold text-sm leading-snug truncate">{event.instructor}</p>
+                  {event.instructorRole && (
+                    <p className="text-[10px] text-[#898F9D] font-bold uppercase tracking-wider mt-0.5 truncate">{event.instructorRole}</p>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -298,14 +303,14 @@ const OverlayContent = ({ event, onClose }: { event: PlatziEvent, onClose: () =>
             }
           }}
           className={cn(
-            "w-full py-2.5 px-3 font-bold text-sm rounded-xl transition-colors shadow-sm",
+            "w-full py-2.5 px-3 font-bold text-sm rounded-xl transition-colors shadow-sm flex items-center justify-center gap-2",
             isLiveCta
               ? ctaState === 'added'
-                ? "bg-[#0A0F18] border border-[#1D293D] text-white hover:bg-[#131A28] flex items-center justify-center gap-3"
+                ? "bg-[#0A0F18] border border-[#1D293D] text-white hover:bg-[#131A28] gap-3"
                 : ctaState === 'registered'
-                  ? "bg-[#0A0F18] border border-[#1D293D] text-white flex items-center justify-center gap-2 cursor-default"
-                  : "bg-white hover:bg-slate-200 text-black"
-              : "bg-white hover:bg-slate-200 text-black",
+                  ? "bg-[#0A0F18] border border-[#1D293D] text-white cursor-default"
+                  : "bg-[#00ED80] hover:bg-[#00ED80]/90 text-slate-900"
+              : "bg-[#00ED80] hover:bg-[#00ED80]/90 text-slate-900",
           )}
         >
           {isLiveCta ? (

@@ -148,7 +148,7 @@ const getEventsForDay = (day: Date, allEvents: PlatziEvent[]): PlatziEvent[] => 
 
 // --- Sidebar ---
 const Sidebar = () => (
-  <aside className="w-[80px] shrink-0 bg-[#13171B] border-r border-[#1D293D] hidden md:flex flex-col items-center h-screen sticky top-0 py-6 z-10">
+  <aside className="w-[80px] shrink-0 bg-[#13171B] border-r border-[#898F9D] hidden md:flex flex-col items-center h-screen sticky top-0 py-6 z-10">
     <div className="flex items-center justify-center mb-8">
       <img src="https://static.platzi.com/media/platzi-isotipo@2x.png" alt="Platzi Logo" className="w-8 h-8 object-contain platzi-logo-accent" />
     </div>
@@ -759,7 +759,6 @@ const Agenda = () => {
   
   // Filters state
   const [filterCategories, setFilterCategories] = useState<EventCategory[]>([]);
-  const [filterPago, setFilterPago] = useState<boolean | null>(null);
   const [filterSchools, setFilterSchools] = useState<string[]>([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -803,17 +802,13 @@ const Agenda = () => {
   const filteredEvents = useMemo(() => {
     return MOCK_EVENTS.filter(event => {
       if (filterCategories.length > 0 && !filterCategories.includes(event.category)) return false;
-      if (filterPago !== null) {
-        if (filterPago && event.isFree) return false;
-        if (!filterPago && !event.isFree) return false;
-      }
       if (filterSchools.length > 0) {
         const eventSchool = event.school ? normalizeSchool(event.school) : null;
         if (!eventSchool || !filterSchools.includes(eventSchool)) return false;
       }
       return true;
     });
-  }, [filterCategories, filterPago, filterSchools]);
+  }, [filterCategories, filterSchools]);
 
   const viewOptionsForDevice = useMemo(() => {
     const base = isMobile
@@ -916,7 +911,7 @@ const Agenda = () => {
             <div className="relative">
               <button 
                 onClick={() => setIsViewMenuOpen(!isViewMenuOpen)}
-                className="flex items-center gap-4 bg-[#13171B] border border-[#1D293D] rounded-xl px-0 py-3 text-sm font-semibold text-white hover:bg-[#1C2230] transition-colors w-full min-w-[100px] justify-center"
+                className="flex items-center gap-4 bg-[#13171B] border border-[#898F9D] rounded-xl px-0 py-3 text-sm font-semibold text-white hover:bg-[#1C2230] transition-colors w-full min-w-[100px] justify-center"
               >
                 {viewOptionsForDevice.find(o => o.id === viewMode)?.label ?? 'Mes'}
                 <ChevronDown className={cn("w-4 h-4 text-[#62748E] transition-transform duration-200", isViewMenuOpen && "rotate-180")} />
@@ -977,9 +972,9 @@ const Agenda = () => {
             aria-label={t('filters')}
           >
             <SlidersHorizontal className="w-5 h-5" />
-            {(filterCategories.length + (filterPago !== null ? 1 : 0) + filterSchools.length) > 0 && (
+            {(filterCategories.length + filterSchools.length) > 0 && (
               <span className="absolute -top-1 -right-1 bg-[#00ED80] text-slate-900 text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
-                {filterCategories.length + (filterPago !== null ? 1 : 0) + filterSchools.length}
+                {filterCategories.length + filterSchools.length}
               </span>
             )}
           </button>
@@ -1008,8 +1003,6 @@ const Agenda = () => {
         onClose={() => setIsFilterOpen(false)}
         filterCategories={filterCategories}
         setFilterCategories={setFilterCategories}
-        filterPago={filterPago}
-        setFilterPago={setFilterPago}
         filterSchools={filterSchools}
         setFilterSchools={setFilterSchools}
         availableSchools={availableSchools}
