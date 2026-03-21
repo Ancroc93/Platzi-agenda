@@ -77,6 +77,54 @@ const CATEGORY_HEX: Record<EventCategory, string> = {
   'Platzi CONF':              '#A855F7',
 };
 
+const CATEGORY_LABELS: Record<EventCategory, string> = {
+  'Platzi Live': 'Platzi Live',
+  'Lanzamiento de cursos': 'Lanzamiento de un curso',
+  'Clases Platzi Master': 'Clase Platzi Master',
+  'Clases abiertas al público': 'Clase abierta',
+  'Platzi CONF Charla': 'Platzi CONF Charla',
+  'Platzi Gratis': 'Platzi Day',
+  'Descuentos y promociones': 'Día de ofertas',
+  'Platzi CONF': 'Platzi CONF',
+};
+
+const getMonthAllDayVisual = (event: PlatziEvent) => {
+  if (event.category === 'Platzi Gratis') {
+    return {
+      label: 'Platzi Day',
+      accent: '#00ED80',
+      headerBg: 'rgba(5,187,105,0.5)',
+      text: 'text-white',
+    };
+  }
+
+  if (event.category === 'Platzi CONF') {
+    return {
+      label: event.title,
+      accent: '#A855F7',
+      headerBg: 'rgba(133,71,196,0.5)',
+      text: 'text-white',
+    };
+  }
+
+  if (event.category === 'Descuentos y promociones') {
+    const shortOfferLabel = event.title.replace(/\s*:\s.*$/, '').replace(/\s+Platzi$/i, '').trim();
+    return {
+      label: shortOfferLabel || event.title,
+      accent: '#E39422',
+      headerBg: 'rgba(179,119,32,0.5)',
+      text: 'text-white',
+    };
+  }
+
+  return {
+    label: event.title,
+    accent: CATEGORY_HEX[event.category] || '#1C2230',
+    headerBg: 'rgba(28,34,48,0.55)',
+    text: 'text-[#E5E7EB]',
+  };
+};
+
 /**
  * Devuelve los eventos que ocurren en un día dado.
  * Para eventos de día completo (isAllDay=true) se evalúa el rango de días
@@ -100,11 +148,11 @@ const getEventsForDay = (day: Date, allEvents: PlatziEvent[]): PlatziEvent[] => 
 
 // --- Sidebar ---
 const Sidebar = () => (
-  <aside className="w-[80px] shrink-0 bg-[#13171B] border-r border-slate-800/50 hidden md:flex flex-col items-center h-screen sticky top-0 py-6">
+  <aside className="w-[80px] shrink-0 bg-[#13171B] border-r border-[#1D293D] hidden md:flex flex-col items-center h-screen sticky top-0 py-6 z-10">
     <div className="flex items-center justify-center mb-8">
       <img src="https://static.platzi.com/media/platzi-isotipo@2x.png" alt="Platzi Logo" className="w-8 h-8 object-contain platzi-logo-accent" />
     </div>
-    <nav className="flex-1 flex flex-col gap-4 w-full px-3">
+    <nav className="flex-1 flex flex-col gap-4 w-full px-3 overflow-visible">
       {[
         { icon: Home, label: 'Inicio', active: false },
         { icon: CalendarIcon, label: 'Agenda', active: true },
@@ -119,15 +167,15 @@ const Sidebar = () => (
           title={item.label}
           className={cn(
             "flex items-center justify-center w-full aspect-square rounded-xl transition-colors group relative",
-            item.active 
+              item.active 
               ? "bg-[#1C2230] text-white" 
-              : "text-[#898F9D] hover:text-white hover:bg-[#1C2230]/50"
+              : "text-[#898F9D] hover:text-white hover:bg-[#1C2230]/60"
           )}
         >
           <item.icon className="w-6 h-6" />
           
           {/* Tooltip on hover */}
-          <div className="absolute left-full ml-4 px-3 py-1.5 bg-[#1C2230] text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity border border-slate-800/50 shadow-xl z-50">
+          <div className="absolute left-full ml-4 px-3 py-1.5 bg-[#1C2230] text-white text-xs font-medium rounded-xl opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap transition-opacity border border-[#1D293D] shadow-xl z-50">
              {item.label}
           </div>
         </a>
@@ -152,8 +200,8 @@ const BottomNav = () => (
           href="#"
           title={item.label}
           className={cn(
-            "w-11 h-11 rounded-2xl flex items-center justify-center transition-colors",
-            item.active ? "bg-[#1C2230] text-white" : "text-[#898F9D] hover:text-white hover:bg-[#1C2230]/60"
+            "w-11 h-11 rounded-xl flex items-center justify-center transition-colors",
+            item.active ? "bg-[#1C2230] text-white" : "text-[#898F9D] hover:text-white hover:bg-[#1C2230]"
           )}
         >
           <item.icon className="w-5 h-5" />
@@ -200,7 +248,7 @@ const TimeGridView = ({
           <div className="w-16 shrink-0 border-r border-[#1D293D] bg-[#1F2229]" />
           {days.map(day => (
             <div key={day.toISOString()} className="flex-1 text-center py-3 border-r border-[#1D293D]/50 min-w-[100px]">
-              <div className="text-[11px] font-bold text-[#62748E] uppercase tracking-wider">{format(day, 'EEE', { locale: dateLocale })}</div>
+              <div className="text-[10px] font-bold text-[#62748E] uppercase tracking-wider">{format(day, 'EEE', { locale: dateLocale })}</div>
               <div className={cn(
                 "text-2xl font-light mt-1 w-10 h-10 mx-auto flex items-center justify-center rounded-full transition-colors", 
                 isToday(day) ? "bg-[#00ED80] text-slate-900 shadow-md font-medium" : "text-[#90A1B9] hover:bg-[#1C2230]"
@@ -215,7 +263,7 @@ const TimeGridView = ({
         {hasAllDayEvents && (
           <div className="flex bg-[#161B26]/95 backdrop-blur border-b border-[#1D293D]">
             <div className="w-16 shrink-0 border-r border-[#1D293D] flex items-center justify-center py-2 px-1">
-              <span className="text-[8px] font-bold text-[#62748E] uppercase tracking-wider text-center leading-tight">
+              <span className="text-[10px] font-bold text-[#62748E] uppercase tracking-wider text-center leading-tight">
                 Todo<br />el día
               </span>
             </div>
@@ -227,12 +275,13 @@ const TimeGridView = ({
                     <div
                       key={event.id}
                       onClick={() => onEventClick(event)}
-                      className={cn(
-                        "rounded px-1.5 py-0.5 text-[9px] sm:text-[10px] font-bold text-white cursor-pointer truncate hover:brightness-110 transition-all",
-                        CATEGORY_COLORS[event.category] || "bg-slate-700"
-                      )}
+                      className="relative rounded-md px-1.5 py-0.5 pl-2.5 text-[10px] font-bold text-white cursor-pointer truncate transition-all bg-[#1F2229] border border-[#2A3140] hover:border-[#3A4458] hover:brightness-110"
                     >
-                      {event.title}
+                      <span
+                        className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-md"
+                        style={{ backgroundColor: CATEGORY_HEX[event.category] || '#898F9D' }}
+                      />
+                      {CATEGORY_LABELS[event.category] || event.title}
                     </div>
                   ))}
                 </div>
@@ -273,18 +322,25 @@ const TimeGridView = ({
                   key={event.id}
                   onClick={() => onEventClick(event)}
                   className={cn(
-                    "absolute left-1 right-2 rounded-md p-1.5 overflow-hidden cursor-pointer transition-all hover:brightness-110 shadow-sm opacity-90 hover:opacity-100 hover:z-10 group",
-                    CATEGORY_COLORS[event.category] || "bg-slate-700",
+                    "absolute left-1 right-2 rounded-md p-1.5 pl-2.5 overflow-hidden cursor-pointer transition-all shadow-sm hover:z-10 group bg-[#1F2229] border border-[#2A3140] hover:border-[#3A4458]",
                     height <= 30 ? "flex items-center gap-2" : "flex flex-col gap-0.5"
                   )}
                   style={{ top: `${top}px`, height: `${height}px` }}
                 >
-                  <div className="font-semibold text-white text-[10px] sm:text-xs leading-tight truncate w-full drop-shadow-sm">
-                    {event.title}
-                  </div>
-                  <div className="text-[9px] text-white/80 font-medium whitespace-nowrap">
-                    {format(event.date, 'HH:mm')}
-                  </div>
+                    <span
+                      className="absolute left-0 top-0 bottom-0 w-[3px]"
+                      style={{ backgroundColor: CATEGORY_HEX[event.category] || '#898F9D' }}
+                    />
+                    <div className="font-semibold text-white text-xs leading-tight truncate w-full drop-shadow-sm">
+                      {CATEGORY_LABELS[event.category] || event.category}
+                    </div>
+                    <div className="font-medium text-[10px] text-[#D7DEE9] leading-tight truncate w-full">
+                      {event.title}
+                    </div>
+                    <div className="text-[10px] text-white/80 font-medium whitespace-nowrap flex items-center gap-1.5">
+                      {event.isLive && <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse shadow-[0_0_6px_white]" />}
+                      {format(event.date, 'HH:mm')}
+                    </div>
                 </div>
               );
             })}
@@ -318,12 +374,12 @@ const MonthView = ({
     <div className="bg-[#13171B] border border-[#898F9D] rounded-2xl overflow-hidden shadow-xl">
       <div className="grid grid-cols-7 border-b border-[#1D293D] bg-[#1F2229]">
         {weekDayLabels.map((day) => (
-          <div key={day} className="py-3 text-center text-[10px] sm:text-[11px] font-bold text-[#62748E] uppercase tracking-[1px]">
+          <div key={day} className="py-3 text-center text-[10px] font-bold text-[#62748E] uppercase tracking-wider">
             {day}
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 auto-rows-[minmax(100px,auto)] bg-[#1D293D] gap-px">
+      <div className="grid grid-cols-7 auto-rows-[minmax(78px,auto)] sm:auto-rows-[minmax(100px,auto)] bg-[#1D293D] gap-px">
         {calendarDays.map((day, idx) => {
           const isCurrentMonth = isSameMonth(day, monthStart);
           const isTodayDate = isToday(day);
@@ -337,55 +393,69 @@ const MonthView = ({
           // Separar all-day de timed para controlar espacio independientemente
           const allDayEvents = dayEvents.filter(e => e.isAllDay);
           const timedEvents = dayEvents.filter(e => !e.isAllDay);
-          // Color del primer evento de día completo (para el foco visual de la celda)
           const firstAllDay = allDayEvents[0];
-          const allDayAccent = firstAllDay && isCurrentMonth
-            ? CATEGORY_HEX[firstAllDay.category]
+          const allDayVisual = firstAllDay && isCurrentMonth
+            ? getMonthAllDayVisual(firstAllDay)
             : null;
+          const extraAllDayEvents = firstAllDay ? allDayEvents.slice(1) : allDayEvents;
+          const timedVisibleLimit = allDayVisual ? 3 : 2;
 
           return (
             <div 
               key={`cal-day-${day.toISOString()}-${idx}`} 
               className={cn(
-                "min-h-[100px] p-1 sm:p-2 transition-colors group relative overflow-hidden",
+                "min-h-[78px] sm:min-h-[100px] p-1 sm:p-2 transition-colors group relative overflow-hidden",
                 !isCurrentMonth ? "bg-[#151A25] opacity-60" : "bg-[#13171B]",
                 isTodayDate && "ring-1 ring-[#00ED80] ring-inset"
               )}
             >
-              {/* Foco de día completo: strip superior + tinte de fondo */}
-              {allDayAccent && (
+              {/* Foco de día completo: tinte + strip + barra superior estilo Figma */}
+              {allDayVisual && (
                 <>
-                  {/* Tinte de fondo sutil */}
                   <div
                     className="absolute inset-0 pointer-events-none"
-                    style={{ backgroundColor: allDayAccent, opacity: 0.07 }}
+                    style={{ backgroundColor: allDayVisual.accent, opacity: 0.07 }}
                   />
-                  {/* Strip de acento en el top de la celda */}
                   <div
                     className="absolute top-0 left-0 right-0 h-[3px]"
-                    style={{ backgroundColor: allDayAccent }}
+                    style={{ backgroundColor: allDayVisual.accent }}
                   />
+                  <button
+                    onClick={() => onEventClick(firstAllDay)}
+                    title={firstAllDay.title}
+                    aria-label={firstAllDay.title}
+                    className="absolute top-[3px] left-0 right-0 h-[20.5px] rounded-br-[4px] px-[6px] pt-[2px] flex items-center gap-[6px] text-left focus:outline-none hover:brightness-110 transition-all"
+                    style={{ backgroundColor: allDayVisual.headerBg }}
+                  >
+                    <span className="w-7 text-[13px] leading-[17px] font-bold text-white shrink-0">
+                      {format(day, 'd')}
+                    </span>
+                    <span className={cn("text-[10px] leading-[17px] font-bold truncate", allDayVisual.text)}>
+                      {allDayVisual.label}
+                    </span>
+                  </button>
                 </>
               )}
 
-              <div className="relative flex justify-center sm:justify-between items-start mb-1 sm:mb-2 pt-0.5">
-                <span className={cn(
-                  "text-xs sm:text-[13px] font-bold w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-full transition-colors",
-                  isTodayDate ? "bg-[#00ED80] text-slate-900 shadow-md" : "text-[#90A1B9] group-hover:text-white"
-                )}>
-                  {format(day, 'd')}
-                </span>
-                {/* Contador solo para eventos con hora (los all-day ya están indicados por el strip) */}
-                {dayEvents.filter(e => !e.isAllDay).length > 0 && (
-                  <span className="text-[9px] sm:text-[10px] text-[#898F9D] font-medium hidden sm:block uppercase tracking-wider mt-1">
-                    {dayEvents.filter(e => !e.isAllDay).length}{' '}
-                    {dayEvents.filter(e => !e.isAllDay).length === 1 ? t('evt') : t('evts')}
+              {!allDayVisual && (
+                <div className="relative flex justify-center sm:justify-between items-start mb-0.5 sm:mb-2 pt-0.5">
+                  <span className={cn(
+                    "text-xs font-bold w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center rounded-full transition-colors",
+                    isTodayDate ? "bg-[#00ED80] text-slate-900 shadow-md" : "text-[#90A1B9] group-hover:text-white"
+                  )}>
+                    {format(day, 'd')}
                   </span>
-                )}
-              </div>
-              <div className="relative space-y-0.5">
-                {/* Bandas finas de eventos de día completo (todas, son casi invisibles) */}
-                {allDayEvents.map(event => (
+                  {timedEvents.length > 0 && (
+                    <span className="text-[10px] text-[#898F9D] font-bold hidden sm:block uppercase tracking-wider mt-1">
+                      {timedEvents.length} {timedEvents.length === 1 ? t('evt') : t('evts')}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              <div className={cn("relative space-y-1", allDayVisual && "mt-6")}>
+                {/* Si hay más eventos de día completo, se muestran como líneas de apoyo */}
+                {extraAllDayEvents.slice(0, 2).map(event => (
                   <button
                     key={`${event.id}-${day.toISOString()}`}
                     onClick={() => onEventClick(event)}
@@ -395,7 +465,7 @@ const MonthView = ({
                   >
                     <div
                       className={cn(
-                        "w-full h-[4px] rounded-full opacity-75 hover:opacity-100 hover:scale-y-125 transition-all",
+                        "w-full h-[3px] rounded-full opacity-70 hover:opacity-100 transition-all",
                         CATEGORY_COLORS[event.category] || "bg-slate-700"
                       )}
                     />
@@ -403,31 +473,33 @@ const MonthView = ({
                 ))}
 
                 {/* Pills normales para eventos con hora (máx. 2 para dejar espacio) */}
-                {timedEvents.slice(0, 2).map(event => (
+                {timedEvents.slice(0, timedVisibleLimit).map(event => (
                   <button
                     key={`${event.id}-${day.toISOString()}`}
                     onClick={() => onEventClick(event)}
                     className="w-full text-left focus:outline-none"
                   >
                     <div className={cn(
-                      "text-[9px] sm:text-[10px] px-1.5 py-1 flex items-center gap-1.5 rounded transition-all w-full overflow-hidden",
-                      CATEGORY_COLORS[event.category] || "bg-slate-700",
-                      "hover:brightness-110 hover:-translate-y-px hover:shadow-md"
+                      "relative text-[10px] pl-3 pr-1.5 py-1 flex items-center gap-1.5 rounded-md transition-all w-full overflow-hidden bg-[#1F2229] hover:bg-[#252A34] border border-[#2A3140] hover:border-[#3A4458]"
                     )}>
+                      <span
+                        className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l"
+                        style={{ backgroundColor: CATEGORY_HEX[event.category] || '#898F9D' }}
+                      />
                       {event.isLive && (
-                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse shadow-[0_0_6px_white] shrink-0 hidden sm:block" />
+                        <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse shadow-[0_0_6px_white] shrink-0" />
                       )}
                       <span className="font-semibold text-white truncate w-full drop-shadow-sm leading-tight">
-                        {event.title}
+                        {CATEGORY_LABELS[event.category] || event.category}
                       </span>
                     </div>
                   </button>
                 ))}
 
                 {/* Overflow: mostrar solo el excedente de eventos con hora */}
-                {timedEvents.length > 2 && (
-                  <div className="text-[9px] font-medium text-[#898F9D] text-center pt-0.5 cursor-pointer hover:text-white transition-colors">
-                    + {timedEvents.length - 2} {t('more')}
+                {timedEvents.length > timedVisibleLimit && (
+                  <div className="text-[10px] font-bold text-[#898F9D] text-center pt-0.5 cursor-pointer hover:text-white transition-colors uppercase tracking-wider">
+                    + {timedEvents.length - timedVisibleLimit} {t('more')}
                   </div>
                 )}
               </div>
@@ -486,7 +558,7 @@ const YearView = ({
 
         <div className="grid grid-cols-7 gap-1 text-center mb-1">
           {miniWeekLetters.map((d, i) => (
-            <div key={`${d}-${i}`} className="text-[9px] font-bold text-[#62748E] uppercase">
+            <div key={`${d}-${i}`} className="text-[10px] font-bold text-[#62748E] uppercase tracking-wider">
               {d}
             </div>
           ))}
@@ -595,10 +667,10 @@ const AgendaView = ({ events, onEventClick }: { events: PlatziEvent[], onEventCl
             {showDateHeader && (
               <div className="bg-[#1F2229] px-6 py-3 border-y border-[#1D293D] flex items-center gap-3">
                  <div className="w-10 h-10 rounded-full bg-[#1C2230] flex flex-col items-center justify-center text-white shrink-0">
-                    <span className="text-[10px] font-bold text-[#62748E] leading-none">{format(event.date, 'EEE', { locale: dateLocale }).toUpperCase()}</span>
+                    <span className="text-[10px] font-bold text-[#62748E] uppercase tracking-wider leading-none">{format(event.date, 'EEE', { locale: dateLocale })}</span>
                     <span className="text-sm font-bold leading-none mt-0.5">{format(event.date, 'd')}</span>
                  </div>
-                 <h3 className="text-sm font-semibold text-[#898F9D] capitalize">
+                 <h3 className="text-base font-semibold text-[#898F9D] capitalize leading-[1.4]">
                    {format(event.date, "MMMM yyyy", { locale: dateLocale })}
                  </h3>
               </div>
@@ -620,9 +692,9 @@ const AgendaView = ({ events, onEventClick }: { events: PlatziEvent[], onEventCl
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <span className={cn("w-2 h-2 rounded-full", CATEGORY_COLORS[event.category] || "bg-slate-500")} />
-                  <span className="text-xs font-semibold text-[#898F9D] uppercase tracking-wider">{event.category}</span>
+                  <span className="text-[10px] font-bold text-[#898F9D] uppercase tracking-wider">{event.category}</span>
                 </div>
-                <h4 className="text-white font-bold text-base">{event.title}</h4>
+                <h4 className="text-white font-semibold text-sm leading-[1.4]">{event.title}</h4>
               </div>
             </div>
           </React.Fragment>
@@ -661,7 +733,11 @@ const Root = () => {
           <AppTopBar isHidden={isTopBarHidden} />
           <main 
             onScroll={handleScroll}
-            className="flex-1 overflow-y-auto pb-24 md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+          className={cn(
+            "flex-1 overflow-y-auto pb-24 md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]",
+            !isTopBarHidden && "pt-16",
+            "md:pt-0",
+          )}
           >
             <Outlet />
           </main>
@@ -825,12 +901,10 @@ const Agenda = () => {
         {/* Featured Events Section */}
         <FeaturedEvents onEventClick={setSelectedEvent} />
 
-        <div className="mt-2">
-          <h1 className="text-3xl sm:text-[32px] font-bold text-white mb-0 tracking-tight">{t('agendaTitle')}</h1>
-        </div>
+        <h1 className="text-2xl font-bold text-white leading-[1.3] tracking-tight">{t('agendaTitle')}</h1>
 
-        {/* Calendar Controls (desktop layout like reference) */}
-        <div className="flex items-center justify-between mt-0">
+        {/* Calendar Controls */}
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {/* View Selector Dropdown */}
             <div className="relative">
@@ -851,13 +925,13 @@ const Agenda = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute top-full mt-2 left-0 w-48 bg-[#1C2230] border border-slate-700 rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden"
+                      className="absolute top-full mt-2 left-0 w-48 bg-[#1C2230] border border-[#898F9D] rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden"
                     >
                       {viewOptionsForDevice.map((option) => (
                         <button
                           key={option.id}
                           onClick={() => { setViewMode(option.id); setIsViewMenuOpen(false); }}
-                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-[#2A3441] flex items-center justify-between group transition-colors"
+                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-[#1C2230] flex items-center justify-between group transition-colors rounded-lg"
                         >
                           <span className={cn(
                             "font-medium",
@@ -902,7 +976,7 @@ const Agenda = () => {
           </button>
         </div>
 
-        <h2 className="text-2xl sm:text-[16px] font-bold text-white capitalize tracking-tight mt-6">
+        <h2 className="text-xl font-bold text-white capitalize leading-[1.3] tracking-tight">
           {getHeaderText()}
         </h2>
       </div>

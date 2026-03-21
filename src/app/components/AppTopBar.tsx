@@ -5,7 +5,7 @@ import { useI18n } from '../context/I18nContext';
 
 function RocketIllustration({ className }: { className?: string }) {
   return (
-    <img src="/rocket-green.svg" alt="" aria-hidden className={className} />
+    <img src="/rocket-green-v2.png" alt="" aria-hidden className={className} />
   );
 }
 
@@ -24,7 +24,7 @@ function TranslateIcon({ className }: { className?: string }) {
   );
 }
 
-const PLATZI_GREEN = '#7BE88E';
+const PLATZI_GREEN = '#00ED80';
 const HEADER_BG = 'rgba(19, 23, 27, 1)';
 const HEADER_BORDER = '#898F9D';
 const SEARCH_BG = '#0D0F12';
@@ -54,8 +54,8 @@ function LanguageMenu({ locale, t, setLocale }: LanguageMenuProps) {
         <button
           type="button"
           className={cn(
-            'w-full text-left px-3 py-2 text-sm hover:bg-[#2A3441]',
-            locale === 'es' && 'text-[#7BE88E]',
+            'w-full text-left px-3 py-2 text-sm hover:bg-[#1C2230] rounded-lg transition-colors',
+            locale === 'es' ? 'text-[#00ED80]' : 'text-[#898F9D] hover:text-white',
           )}
           onClick={() => setLocale('es')}
         >
@@ -64,8 +64,8 @@ function LanguageMenu({ locale, t, setLocale }: LanguageMenuProps) {
         <button
           type="button"
           className={cn(
-            'w-full text-left px-3 py-2 text-sm hover:bg-[#2A3441]',
-            locale === 'en' && 'text-[#7BE88E]',
+            'w-full text-left px-3 py-2 text-sm hover:bg-[#1C2230] rounded-lg transition-colors',
+            locale === 'en' ? 'text-[#00ED80]' : 'text-[#898F9D] hover:text-white',
           )}
           onClick={() => setLocale('en')}
         >
@@ -94,7 +94,7 @@ export function AppTopBar({ isHidden }: { isHidden?: boolean }) {
   return (
     <header
       className={cn(
-        'shrink-0 sticky top-0 z-30 transition-transform duration-300',
+        'absolute top-0 inset-x-0 md:relative z-30 transition-transform duration-300',
         isHidden ? '-translate-y-full' : 'translate-y-0',
       )}
       style={{ backgroundColor: HEADER_BG, borderColor: HEADER_BORDER }}
@@ -102,11 +102,11 @@ export function AppTopBar({ isHidden }: { isHidden?: boolean }) {
       <div className="hidden md:flex h-[72px] items-center gap-5 px-6">
         <div className="flex-1 min-w-0">
           <div className="relative w-full max-w-[620px]">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-[#898F9D] pointer-events-none" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#898F9D] pointer-events-none" />
             <input
               type="search"
               placeholder={t('searchPlaceholder')}
-              className="w-full h-11 border rounded-[10px] pl-11 pr-4 text-sm text-white placeholder:text-[#898F9D] focus:outline-none focus:border-[#7BE88E] focus:ring-1 focus:ring-[#7BE88E]/40 transition-shadow"
+              className="w-full h-11 border rounded-xl pl-11 pr-4 text-sm text-white placeholder:text-[#898F9D] focus:outline-none focus:border-[#00ED80] focus:ring-1 focus:ring-[#00ED80]/30 transition-shadow"
               style={{ backgroundColor: SEARCH_BG, borderColor: HEADER_BORDER }}
             />
           </div>
@@ -152,8 +152,8 @@ export function AppTopBar({ isHidden }: { isHidden?: boolean }) {
                 <button
                   type="button"
                   className={cn(
-                    'w-full text-left px-3 py-2 text-sm hover:bg-[#2A3441]',
-                    locale === 'es' && 'text-[#7BE88E]',
+                    'w-full text-left px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[#1C2230]',
+                    locale === 'es' ? 'text-[#00ED80]' : 'text-[#898F9D] hover:text-white',
                   )}
                   onClick={() => {
                     setLocale('es');
@@ -165,8 +165,8 @@ export function AppTopBar({ isHidden }: { isHidden?: boolean }) {
                 <button
                   type="button"
                   className={cn(
-                    'w-full text-left px-3 py-2 text-sm hover:bg-[#2A3441]',
-                    locale === 'en' && 'text-[#7BE88E]',
+                    'w-full text-left px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[#1C2230]',
+                    locale === 'en' ? 'text-[#00ED80]' : 'text-[#898F9D] hover:text-white',
                   )}
                   onClick={() => {
                     setLocale('en');
@@ -235,8 +235,8 @@ export function AppTopBar({ isHidden }: { isHidden?: boolean }) {
                 <button
                   type="button"
                   className={cn(
-                    'w-full text-left px-3 py-2 text-sm hover:bg-[#2A3441]',
-                    locale === 'es' && 'text-[#7BE88E]',
+                    'w-full text-left px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[#1C2230]',
+                    locale === 'es' ? 'text-[#00ED80]' : 'text-[#898F9D] hover:text-white',
                   )}
                   onClick={() => {
                     setLocale('es');
@@ -248,8 +248,8 @@ export function AppTopBar({ isHidden }: { isHidden?: boolean }) {
                 <button
                   type="button"
                   className={cn(
-                    'w-full text-left px-3 py-2 text-sm hover:bg-[#2A3441]',
-                    locale === 'en' && 'text-[#7BE88E]',
+                    'w-full text-left px-3 py-2 text-sm rounded-lg transition-colors hover:bg-[#1C2230]',
+                    locale === 'en' ? 'text-[#00ED80]' : 'text-[#898F9D] hover:text-white',
                   )}
                   onClick={() => {
                     setLocale('en');

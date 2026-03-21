@@ -102,7 +102,7 @@ const PLATZI_LIVE_EVENTS: PlatziEvent[] = getThursdaysOfYear().map((date, i) => 
   durationMinutes: 180, // 4 pm → 7 pm
   tags: ['Comunidad', 'En vivo'],
   description:
-    'Todos los jueves de 4 pm a 7 pm (hora Colombia). El Team Platzi en vivo: tecnología, preguntas de la comunidad y los temas que mueven la industria.',
+    'Platzi Live es un espacio de aprendizaje en vivo donde la comunidad TECH se reúne para aprender, interactuar y crecer en conjunto 🚀.\n\nAquí aprendes con las personas más TOP en IA, marketing, programación, liderazgo, y mucho más.\n\nLa agenda estará pronto disponible, pero te aseguramos que estará increíble, así que regístrate YA.\n\n¿Quieres que hablemos de un tema? Escríbenos en team@platzi.com',
   instructor: 'Freddy Vega',
   instructorRole: 'CEO de Platzi',
 }));

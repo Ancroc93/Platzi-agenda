@@ -17,7 +17,7 @@ export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent
         e.category === 'Clases abiertas al público',
       )
       .sort((a, b) => a.date.getTime() - b.date.getTime())
-      .slice(0, 8);
+      .slice(0, 4);
   }, []);
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -31,9 +31,9 @@ export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent
   };
 
   return (
-    <section className="mb-10 group">
-      <h2 className="text-[32px] font-bold text-white mb-2 tracking-tight">{t('featuredTitle')}</h2>
-      <p className="text-[#898F9D] text-[12px] mb-6 max-w-3xl">
+    <section className="mb-8 group">
+      <p className="text-[32px] font-bold text-white leading-[1.2] mb-2 tracking-tight">{t('featuredTitle')}</p>
+      <p className="text-[#898F9D] text-sm mb-6 max-w-3xl leading-relaxed">
         {t('featuredSubtitle')}
       </p>
 
@@ -73,7 +73,7 @@ export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent
             <div 
               key={event.id}
               onClick={() => onEventClick(event)}
-              className="snap-start shrink-0 w-[300px] sm:w-[340px] md:w-[360px] h-[240px] rounded-[20px] p-5 flex flex-col justify-between cursor-pointer border border-slate-700/30 hover:border-slate-500/50 transition-all relative overflow-hidden group shadow-lg"
+              className="snap-start shrink-0 w-[300px] sm:w-[340px] md:w-[360px] h-[240px] rounded-2xl p-5 flex flex-col justify-between cursor-pointer border border-[#1D293D] hover:border-[#898F9D]/50 transition-all relative overflow-hidden group shadow-lg"
             >
               {/* Background Gradient Effect matching the image */}
               <div className={cn(
@@ -115,7 +115,7 @@ export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent
                   </div>
                 </div>
                 
-                <h3 className="text-white font-bold text-lg leading-tight transition-colors line-clamp-2">
+                <h3 className="text-white font-bold text-base leading-snug transition-colors line-clamp-2">
                   {event.title} {isPlatziLive && <span className="inline-block">🔥</span>}
                 </h3>
               </div>
@@ -137,14 +137,14 @@ export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent
                       </div>
                       <div className="min-w-0">
                          <p className="text-white text-sm font-semibold truncate">{event.instructor}</p>
-                         <p className="text-[#898F9D] text-[9px] font-bold uppercase tracking-wider truncate">{event.instructorRole}</p>
+                         <p className="text-[#898F9D] text-[10px] font-bold uppercase tracking-wider truncate">{event.instructorRole}</p>
                       </div>
                     </>
                   )}
                 </div>
 
                 <button className="w-full py-2.5 bg-white hover:bg-slate-200 text-black font-bold text-sm rounded-xl transition-colors shadow-sm">
-                  {event.isFree ? t('viewFree') : t('registerFree')}
+                  Regístrate gratis
                 </button>
               </div>
             </div>

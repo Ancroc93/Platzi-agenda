@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import { X, Check } from 'lucide-react';
 import { cn } from './EventOverlay';
 import { EventCategory } from '../data/events';
@@ -52,6 +52,9 @@ export const FilterOverlay = ({
   setFilterSchools,
   availableSchools,
 }: FilterOverlayProps) => {
+  // Los hooks deben ir siempre antes de cualquier early return
+  const dragControls = useDragControls();
+
   if (!isOpen) return null;
 
   const toggleCategory = (cat: EventCategory) => {
@@ -105,9 +108,17 @@ export const FilterOverlay = ({
   };
 
   const OverlayContent = (
-    <div className="flex flex-col h-full bg-[#13171B] text-white overflow-hidden">
+    <div className="relative flex flex-col h-full bg-[#13171B] text-white overflow-hidden">
+      {/* Botón cerrar (desktop, patrón unificado de modales) */}
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 p-2 bg-[#13171B]/60 hover:bg-[#13171B]/80 rounded-full transition-colors backdrop-blur-sm z-10 hidden lg:block"
+      >
+        <X className="w-5 h-5 text-white" />
+      </button>
+
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-slate-800 shrink-0">
+      <div className="flex items-center justify-between p-6 border-b border-[#1D293D] shrink-0">
         <div>
           <h2 className="text-xl font-bold">Filtros</h2>
           {activeFiltersCount > 0 && (
@@ -116,7 +127,7 @@ export const FilterOverlay = ({
         </div>
         <button
           onClick={onClose}
-          className="p-2 bg-[#1C2230]/70 hover:bg-[#1C2230] rounded-full transition-colors"
+          className="p-2 bg-[#1C2230]/70 hover:bg-[#1C2230] rounded-full transition-colors lg:hidden"
         >
           <X className="w-5 h-5 text-[#898F9D]" />
         </button>
@@ -124,13 +135,9 @@ export const FilterOverlay = ({
 
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] p-6 space-y-8">
 
-        {/* Divulgación */}
+        {/* Categorías */}
         <section>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-2 h-2 rounded-full bg-[#F23A3A]" />
-            <h3 className="text-sm font-bold text-[#898F9D] uppercase tracking-wider">Divulgación</h3>
-          </div>
-          <p className="text-[11px] text-[#898F9D]/60 mb-3 -mt-2">Eventos con horario específico</p>
+          <h3 className="text-[10px] font-bold text-[#898F9D] uppercase tracking-wider mb-4">Categorías</h3>
           <div className="space-y-3">
             {DIVULGACION_CATEGORIES.map(cat => (
               <CategoryCheckbox key={cat} cat={cat} />
@@ -138,56 +145,10 @@ export const FilterOverlay = ({
           </div>
         </section>
 
-        {/* Promoción */}
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-2 h-2 rounded-full bg-[#00ED80]" />
-            <h3 className="text-sm font-bold text-[#898F9D] uppercase tracking-wider">Promoción</h3>
-          </div>
-          <p className="text-[11px] text-[#898F9D]/60 mb-3 -mt-2">Eventos de día completo</p>
-          <div className="space-y-3">
-            {PROMOCION_CATEGORIES.map(cat => (
-              <CategoryCheckbox key={cat} cat={cat} />
-            ))}
-          </div>
-        </section>
-
-        {/* Costo */}
-        <section>
-          <h3 className="text-sm font-bold text-[#898F9D] uppercase tracking-wider mb-4">Costo</h3>
-          <div className="flex flex-wrap gap-2">
-            {(
-              [
-                { label: 'Todos', value: null },
-                { label: 'Gratuitos', value: false },
-                { label: 'De pago', value: true },
-              ] as { label: string; value: boolean | null }[]
-            ).map(({ label, value }) => {
-              const active = filterPago === value;
-              return (
-                <button
-                  key={label}
-                  onClick={() => setFilterPago(value)}
-                  className={cn(
-                    'px-4 py-2 rounded-full text-sm font-medium transition-colors border',
-                    active
-                      ? value === null
-                        ? 'bg-[#1C2230] border-[#898F9D] text-white'
-                        : 'bg-[#00ED80]/20 border-[#00ED80]/50 text-[#00ED80]'
-                      : 'border-[#898F9D] text-[#898F9D] hover:border-white hover:text-white',
-                  )}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
         {/* Escuelas */}
         {availableSchools.length > 0 && (
           <section>
-            <h3 className="text-sm font-bold text-[#898F9D] uppercase tracking-wider mb-4">Escuelas</h3>
+            <h3 className="text-[10px] font-bold text-[#898F9D] uppercase tracking-wider mb-4">Escuelas</h3>
             <div className="space-y-3 pb-8">
               {availableSchools.map(school => {
                 const isSelected = filterSchools.includes(school);
@@ -218,16 +179,16 @@ export const FilterOverlay = ({
       </div>
 
       {/* Footer */}
-      <div className="p-6 border-t border-slate-800 bg-[#0D0F12] shrink-0 flex gap-4">
+      <div className="p-6 border-t border-[#1D293D] bg-[#0D0F12] shrink-0 flex gap-4">
         <button
           onClick={clearAll}
-          className="flex-1 py-3 px-4 rounded-lg font-bold text-[#898F9D] hover:text-white bg-[#1C2230]/60 hover:bg-[#1C2230] transition-colors"
+          className="flex-1 py-3 px-4 rounded-xl font-bold text-[#898F9D] hover:text-white bg-[#1C2230]/60 hover:bg-[#1C2230] transition-colors"
         >
           Limpiar
         </button>
         <button
           onClick={onClose}
-          className="flex-1 py-3 px-4 rounded-lg font-bold text-slate-900 bg-[#00ED80] hover:bg-[#00ED80]/90 transition-colors"
+          className="flex-1 py-3 px-4 rounded-xl font-bold text-slate-900 bg-[#00ED80] hover:bg-[#00ED80]/90 transition-colors"
         >
           Aplicar filtros
         </button>
@@ -249,14 +210,30 @@ export const FilterOverlay = ({
               className="fixed inset-0 bg-[#13171B]/80 backdrop-blur-sm z-40"
             />
             <motion.div
+              /* ── Swipe-to-dismiss ── */
+              drag="y"
+              dragControls={dragControls}
+              dragListener={false}
+              dragConstraints={{ top: 0 }}
+              dragElastic={{ top: 0, bottom: 0.3 }}
+              dragSnapToOrigin
+              onDragEnd={(_, info) => {
+                if (info.velocity.y > 300 || info.offset.y > 100) onClose();
+              }}
+              /* ── Animación entrada/salida ── */
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
               className="fixed bottom-0 left-0 right-0 h-[85vh] bg-[#13171B] rounded-t-3xl overflow-hidden z-50 flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-[#898F9D]"
             >
-              <div className="absolute top-0 left-0 right-0 h-6 flex justify-center items-center z-20 cursor-pointer" onClick={onClose}>
-                <div className="w-12 h-1.5 bg-white/20 rounded-full" />
+              {/* Grabber — área táctil que inicia el gesto de cierre */}
+              <div
+                onPointerDown={(e) => dragControls.start(e)}
+                style={{ touchAction: 'none' }}
+                className="absolute top-0 left-0 right-0 h-10 flex justify-center items-center z-20 cursor-grab active:cursor-grabbing select-none"
+              >
+                <div className="w-12 h-1.5 bg-white/25 rounded-full" />
               </div>
               {OverlayContent}
             </motion.div>

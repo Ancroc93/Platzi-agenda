@@ -1,11 +1,54 @@
-import { motion, AnimatePresence } from 'motion/react';
-import { X, Clock, PlayCircle, Star, CalendarDays, ExternalLink } from 'lucide-react';
+import { motion, AnimatePresence, useDragControls } from 'motion/react';
+import {
+  X, Clock, CalendarDays,
+  Code2, Globe, Megaphone, Brain, Shield, Users, PenLine,
+  Smartphone, Video, DollarSign, Cloud, Terminal, Palette,
+  Boxes, UserPlus, Rocket, Briefcase, BookOpen,
+  type LucideIcon,
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { PlatziEvent } from '../data/events';
 import { ImageWithFallback } from './figma/ImageWithFallback';
 import { useI18n } from '../context/I18nContext';
+
+// ─── School icon map ─────────────────────────────────────────────────────────
+const SCHOOL_ICONS: Record<string, LucideIcon> = {
+  'Desarrollo Web':                        Code2,
+  'English Academy':                       Globe,
+  'Marketing Digital':                     Megaphone,
+  'Inteligencia Artificial y Data Science': Brain,
+  'Ciberseguridad':                        Shield,
+  'Liderazgo y Habilidades Blandas':       Users,
+  'Diseño de Producto y UX':               PenLine,
+  'Desarrollo Móvil':                      Smartphone,
+  'Contenido Audiovisual':                 Video,
+  'Finanzas e Inversiones':                DollarSign,
+  'Cloud Computing y DevOps':              Cloud,
+  'Programación':                          Terminal,
+  'Diseño Gráfico y Arte Digital':         Palette,
+  'Blockchain y Web3':                     Boxes,
+  'Recursos Humanos':                      UserPlus,
+  'Startups':                              Rocket,
+  'Negocios':                              Briefcase,
+};
+
+const normalizeSchoolName = (school: string) =>
+  school.replace(/^Escuela de\s+/i, '').trim();
+
+const SchoolCard = ({ school }: { school: string }) => {
+  const name = normalizeSchoolName(school);
+  const Icon = SCHOOL_ICONS[name] ?? BookOpen;
+  return (
+    <div className="flex items-center gap-3 p-3 rounded-xl bg-[#11171B] border border-[#314158]/50">
+      <div className="w-10 h-10 rounded-[10px] bg-[#0D0F12] border border-[#314158]/50 flex items-center justify-center shrink-0">
+        <Icon className="w-5 h-5 text-[#00ED80]" />
+      </div>
+      <p className="text-[#F1F5F9] font-bold text-sm leading-snug">{name}</p>
+    </div>
+  );
+};
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -17,6 +60,8 @@ interface EventOverlayProps {
 }
 
 export const EventOverlay = ({ event, onClose }: EventOverlayProps) => {
+  const dragControls = useDragControls();
+
   return (
     <>
       {/* Mobile Backdrop & Bottom Sheet */}
@@ -29,15 +74,30 @@ export const EventOverlay = ({ event, onClose }: EventOverlayProps) => {
           className="fixed inset-0 bg-[#13171B]/80 backdrop-blur-sm z-40"
         />
         <motion.div
+          /* ── Swipe-to-dismiss ── */
+          drag="y"
+          dragControls={dragControls}
+          dragListener={false}          /* solo el grabber inicia el drag */
+          dragConstraints={{ top: 0 }}  /* no permite arrastrar hacia arriba */
+          dragElastic={{ top: 0, bottom: 0.3 }}
+          dragSnapToOrigin             /* snap-back automático si no supera el umbral */
+          onDragEnd={(_, info) => {
+            if (info.velocity.y > 300 || info.offset.y > 100) onClose();
+          }}
+          /* ── Animación entrada/salida ── */
           initial={{ y: "100%" }}
           animate={{ y: 0 }}
           exit={{ y: "100%" }}
           transition={{ type: "spring", damping: 25, stiffness: 200 }}
           className="fixed bottom-0 left-0 right-0 h-[85vh] bg-[#13171B] rounded-t-3xl overflow-hidden z-50 flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-[#898F9D]"
         >
-          {/* Grabber for bottom sheet affordance */}
-          <div className="absolute top-0 left-0 right-0 h-6 flex justify-center items-center z-20 cursor-pointer" onClick={onClose}>
-            <div className="w-12 h-1.5 bg-white/20 rounded-full" />
+          {/* Grabber — área táctil que inicia el gesto de cierre */}
+          <div
+            onPointerDown={(e) => dragControls.start(e)}
+            style={{ touchAction: 'none' }}
+            className="absolute top-0 left-0 right-0 h-10 flex justify-center items-center z-20 cursor-grab active:cursor-grabbing select-none"
+          >
+            <div className="w-12 h-1.5 bg-white/25 rounded-full transition-colors group-active:bg-white/50" />
           </div>
           <OverlayContent event={event} onClose={onClose} />
         </motion.div>
@@ -104,15 +164,6 @@ const OverlayContent = ({ event, onClose }: { event: PlatziEvent, onClose: () =>
           </div>
         )}
 
-        {/* Badge de tipo */}
-        <div className="absolute top-4 left-4 z-10">
-          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider text-white ${
-            event.eventType === 'promocion' ? 'bg-[#A855F7]/80' : 'bg-[#1C2230]/80'
-          } backdrop-blur-sm`}>
-            {event.eventType === 'promocion' ? 'Promoción' : 'Divulgación'}
-          </span>
-        </div>
-
         {/* Botón cerrar */}
         <button
           onClick={onClose}
@@ -124,12 +175,12 @@ const OverlayContent = ({ event, onClose }: { event: PlatziEvent, onClose: () =>
 
       <div className="flex-1 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] px-6 pb-6 relative -mt-6 sm:-mt-8 z-10">
         {/* Título */}
-        <h2 className="text-2xl sm:text-3xl font-bold mb-4 leading-tight mt-6">
+        <h2 className="text-2xl font-bold mb-4 leading-snug mt-6">
           {event.title}
         </h2>
 
         {/* Meta info */}
-        <div className="flex flex-wrap items-center gap-4 text-sm text-[#898F9D] mt-2 border-b border-[#898F9D] pb-5">
+        <div className="flex flex-wrap items-center gap-4 text-sm text-[#898F9D] mt-2 border-b border-[#1D293D] pb-5">
           <div className="flex items-center gap-1.5">
             <CalendarDays className="w-4 h-4 text-[#00ED80]" />
             <span className="capitalize">
@@ -147,25 +198,24 @@ const OverlayContent = ({ event, onClose }: { event: PlatziEvent, onClose: () =>
         </div>
 
         {/* Descripción */}
-        <div className="mt-5">
-          <p className="text-base text-[#898F9D] leading-relaxed">{event.description}</p>
+        <div className="mt-5 flex flex-col gap-3">
+          {event.description.split('\n\n').map((paragraph, i) => (
+            <p key={i} className="text-base text-[#898F9D] leading-relaxed">{paragraph}</p>
+          ))}
         </div>
 
         {/* Info adicional */}
         <div className="mt-8 space-y-4">
           {event.school && (
-            <div className="p-4 rounded-xl bg-[#1C2230]/60 border border-[#898F9D]">
-              <h4 className="text-xs font-semibold text-[#898F9D] mb-1.5 uppercase tracking-wider">Escuela</h4>
-              <p className="text-white font-medium flex items-center gap-2 text-sm">
-                <span className="w-2 h-2 rounded-full bg-[#33B864]" />
-                {event.school}
-              </p>
+            <div>
+              <h4 className="text-[10px] font-bold text-[#898F9D] mb-3 uppercase tracking-wider">Escuela</h4>
+              <SchoolCard school={event.school} />
             </div>
           )}
 
           {event.instructor && (
-            <div className="p-4 rounded-xl bg-[#1C2230]/60 border border-[#898F9D] flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-[#1C2230] border border-[#898F9D] overflow-hidden flex-shrink-0 flex items-center justify-center">
+            <div className="p-4 rounded-xl bg-[#1C2230]/60 border border-[#1D293D] flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-[#1C2230] border border-[#1D293D] overflow-hidden flex-shrink-0 flex items-center justify-center">
                 <span className="text-lg text-[#898F9D] font-bold">{event.instructor.charAt(0)}</span>
               </div>
               <div>
@@ -178,16 +228,16 @@ const OverlayContent = ({ event, onClose }: { event: PlatziEvent, onClose: () =>
       </div>
 
       {/* CTA */}
-      <div className="p-5 border-t border-[#898F9D] bg-[#0D0F12] w-full mt-auto shrink-0 z-20">
-        <button className="w-full bg-[#00ED80] hover:bg-[#00ED80]/90 text-slate-900 font-bold py-3.5 px-6 rounded-lg flex items-center justify-center gap-2 transition-transform active:scale-[0.98]">
+      <div className="p-6 border-t border-[#1D293D] bg-[#0D0F12] w-full mt-auto shrink-0 z-20">
+        <button className="w-full bg-[#00ED80] hover:bg-[#00ED80]/90 text-slate-900 font-bold py-3.5 px-6 rounded-xl transition-transform active:scale-[0.98]">
           {event.isCourse ? (
-            <><PlayCircle className="w-5 h-5" /> Empezar Curso</>
+            <>Empezar Curso</>
           ) : event.isLive ? (
-            <><CalendarDays className="w-5 h-5" /> Agendar Recordatorio</>
+            <>Regístrate gratis</>
           ) : event.eventType === 'promocion' ? (
-            <><Star className="w-5 h-5" /> Aprovechar Promoción</>
+            <>Aprovechar Promoción</>
           ) : (
-            <><ExternalLink className="w-5 h-5" /> Ver Detalles Completos</>
+            <>Ver Detalles Completos</>
           )}
         </button>
       </div>
