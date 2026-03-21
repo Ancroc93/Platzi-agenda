@@ -5,7 +5,12 @@ import { useI18n } from '../context/I18nContext';
 
 function RocketIllustration({ className }: { className?: string }) {
   return (
-    <img src="/rocket-green-v2.png" alt="" aria-hidden className={className} />
+    <img
+      src={`${import.meta.env.BASE_URL}rocket-green-v2.png`}
+      alt=""
+      aria-hidden
+      className={className}
+    />
   );
 }
 

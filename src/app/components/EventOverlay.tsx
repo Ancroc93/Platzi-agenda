@@ -151,7 +151,7 @@ const OverlayContent = ({ event, onClose }: { event: PlatziEvent, onClose: () =>
         ) : usesPlatziLiveBg ? (
           <>
             <img
-              src="/platzi-live-bg.png"
+              src={`${import.meta.env.BASE_URL}platzi-live-bg.png`}
               alt=""
               aria-hidden="true"
               className="w-full h-full object-cover object-center"
