@@ -190,8 +190,8 @@ const BottomNav = () => (
     <div className="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between">
       {[
         { icon: Search, label: 'Buscar', active: false },
-        { icon: Home, label: 'Inicio', active: false },
         { icon: CalendarIcon, label: 'Agenda', active: true },
+        { icon: Home, label: 'Inicio', active: false },
         { icon: Trophy, label: 'Progreso', active: false },
         { icon: Settings, label: 'Ajustes', active: false },
       ].map((item) => (
@@ -352,9 +352,13 @@ const TimeGridView = ({
 };
 
 const MonthView = ({ 
-  currentDate, events, onEventClick 
+  currentDate, events, onEventClick, setViewMode, setCurrentDate
 }: { 
-  currentDate: Date, events: PlatziEvent[], onEventClick: (e: PlatziEvent) => void 
+  currentDate: Date,
+  events: PlatziEvent[],
+  onEventClick: (e: PlatziEvent) => void,
+  setViewMode: (v: ViewMode) => void,
+  setCurrentDate: (d: Date) => void,
 }) => {
   const { dateLocale, t } = useI18n();
   const monthStart = startOfMonth(currentDate);
@@ -493,9 +497,16 @@ const MonthView = ({
 
                 {/* Overflow: mostrar solo el excedente de eventos con hora */}
                 {timedEvents.length > timedVisibleLimit && (
-                  <div className="text-[10px] font-bold text-[#898F9D] text-center pt-0.5 cursor-pointer hover:text-white transition-colors uppercase tracking-wider">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCurrentDate(day);
+                      setViewMode('day');
+                    }}
+                    className="w-full text-[10px] font-bold text-[#898F9D] text-center pt-0.5 cursor-pointer hover:text-white transition-colors uppercase tracking-wider"
+                  >
                     + {timedEvents.length - timedVisibleLimit} {t('more')}
-                  </div>
+                  </button>
                 )}
               </div>
             </div>
@@ -882,7 +893,15 @@ const Agenda = () => {
       case '3days':
         return <TimeGridView days={Array.from({length: 3}, (_, i) => addDays(currentDate, i))} events={filteredEvents} onEventClick={setSelectedEvent} />;
       case 'month':
-        return <MonthView currentDate={currentDate} events={filteredEvents} onEventClick={setSelectedEvent} />;
+        return (
+          <MonthView
+            currentDate={currentDate}
+            events={filteredEvents}
+            onEventClick={setSelectedEvent}
+            setViewMode={setViewMode}
+            setCurrentDate={setCurrentDate}
+          />
+        );
       case 'year':
         return <YearView currentDate={currentDate} events={filteredEvents} setViewMode={setViewMode} setCurrentDate={setCurrentDate} />;
       default:

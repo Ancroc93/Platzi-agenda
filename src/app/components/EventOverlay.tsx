@@ -258,7 +258,7 @@ const OverlayContent = ({ event, onClose }: { event: PlatziEvent, onClose: () =>
             </div>
           )}
 
-          {event.instructor && (
+          {!event.isAllDay && event.instructor && (
             <div>
               <h4 className="text-[10px] font-bold text-[#898F9D] mb-3 uppercase tracking-wider">Instructor</h4>
               <div className="flex items-center gap-3 p-3 rounded-xl bg-[#11171B] border border-[#314158]/50">
@@ -309,8 +309,8 @@ const OverlayContent = ({ event, onClose }: { event: PlatziEvent, onClose: () =>
                 ? "bg-[#0A0F18] border border-[#1D293D] text-white hover:bg-[#131A28] gap-3"
                 : ctaState === 'registered'
                   ? "bg-[#0A0F18] border border-[#1D293D] text-white cursor-default"
-                  : "bg-[#00ED80] hover:bg-[#00ED80]/90 text-slate-900"
-              : "bg-[#00ED80] hover:bg-[#00ED80]/90 text-slate-900",
+                  : "bg-white hover:bg-slate-200 text-black"
+              : "bg-white hover:bg-slate-200 text-black",
           )}
         >
           {isLiveCta ? (
