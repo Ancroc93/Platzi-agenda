@@ -188,7 +188,7 @@ export const FilterOverlay = ({
         </button>
         <button
           onClick={onClose}
-          className="flex-1 py-3 px-4 rounded-xl font-bold text-slate-900 bg-[#00ED80] hover:bg-[#00ED80]/90 transition-colors"
+          className="flex-1 py-2.5 px-3 font-bold text-sm rounded-xl transition-colors shadow-sm bg-white hover:bg-slate-200 text-black"
         >
           Aplicar filtros
         </button>

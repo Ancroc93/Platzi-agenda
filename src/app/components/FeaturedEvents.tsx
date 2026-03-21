@@ -1,8 +1,8 @@
 import { MOCK_EVENTS, PlatziEvent } from '../data/events';
 import { cn } from './EventOverlay';
 import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useMemo, useRef } from 'react';
+import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
+import { useMemo, useRef, useState } from 'react';
 import { useI18n } from '../context/I18nContext';
 
 export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent) => void }) => {
@@ -19,6 +19,7 @@ export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent
       .sort((a, b) => a.date.getTime() - b.date.getTime())
       .slice(0, 4);
   }, []);
+  const [ctaAddedByEventId, setCtaAddedByEventId] = useState<Record<string, boolean>>({});
   const trackRef = useRef<HTMLDivElement>(null);
 
   if (featured.length === 0) return null;
@@ -143,8 +144,27 @@ export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent
                   )}
                 </div>
 
-                <button className="w-full py-2.5 bg-white hover:bg-slate-200 text-black font-bold text-sm rounded-xl transition-colors shadow-sm">
-                  Regístrate gratis
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCtaAddedByEventId((prev) => ({ ...prev, [event.id]: true }));
+                  }}
+                  className={cn(
+                    "w-full py-2.5 px-3 font-bold text-sm rounded-xl transition-colors shadow-sm",
+                    ctaAddedByEventId[event.id]
+                      ? "bg-[#4B5563] text-white flex items-center justify-between"
+                      : "bg-white hover:bg-slate-200 text-black"
+                  )}
+                >
+                  {ctaAddedByEventId[event.id] ? (
+                    <>
+                      <span>Agregar</span>
+                      <CalendarDays className="w-4 h-4 shrink-0" />
+                    </>
+                  ) : (
+                    'Regístrate gratis'
+                  )}
                 </button>
               </div>
             </div>

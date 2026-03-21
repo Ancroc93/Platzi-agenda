@@ -901,7 +901,12 @@ const Agenda = () => {
         {/* Featured Events Section */}
         <FeaturedEvents onEventClick={setSelectedEvent} />
 
-        <h1 className="text-2xl font-bold text-white leading-[1.3] tracking-tight">{t('agendaTitle')}</h1>
+        <div>
+          <h1 className="text-[32px] font-bold text-white leading-[1.2] mb-2 tracking-tight">{t('agendaTitle')}</h1>
+          <p className="text-[#898F9D] text-sm mb-6 max-w-3xl leading-relaxed">
+            {t('agendaSubtitle')}
+          </p>
+        </div>
 
         {/* Calendar Controls */}
         <div className="flex items-center justify-between">

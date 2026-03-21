@@ -229,7 +229,7 @@ const OverlayContent = ({ event, onClose }: { event: PlatziEvent, onClose: () =>
 
       {/* CTA */}
       <div className="p-6 border-t border-[#1D293D] bg-[#0D0F12] w-full mt-auto shrink-0 z-20">
-        <button className="w-full bg-[#00ED80] hover:bg-[#00ED80]/90 text-slate-900 font-bold py-3.5 px-6 rounded-xl transition-transform active:scale-[0.98]">
+        <button className="w-full py-2.5 px-3 font-bold text-sm rounded-xl transition-colors shadow-sm bg-white hover:bg-slate-200 text-black">
           {event.isCourse ? (
             <>Empezar Curso</>
           ) : event.isLive ? (

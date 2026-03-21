@@ -18,7 +18,8 @@ const DICTS: Record<AppLocale, Dict> = {
     plans: 'Planes',
     points: 'pts',
     agendaTitle: 'Agenda Platzi',
-    agendaSubtitle: 'Mantente al día con lanzamientos y clases en vivo.',
+    agendaSubtitle:
+      'Consulta en un solo lugar lanzamientos, clases en vivo y eventos especiales para planear tu aprendizaje.',
     filters: 'Filtros',
     today: 'Hoy',
     more: 'más',
@@ -33,7 +34,7 @@ const DICTS: Record<AppLocale, Dict> = {
     view3days: '3 días',
     viewMonth: 'Mes',
     viewYear: 'Año',
-    featuredTitle: 'Proximos eventos',
+    featuredTitle: 'Próximos eventos',
     featuredSubtitle:
       'Únete a nuestras Live Classes y aprende de la mano de expertos a potenciar tus habilidades.',
     carouselPrev: 'Desplazar carrusel a la izquierda',
@@ -50,7 +51,8 @@ const DICTS: Record<AppLocale, Dict> = {
     plans: 'Plans',
     points: 'pts',
     agendaTitle: 'Platzi Agenda',
-    agendaSubtitle: 'Stay on top of launches and live classes.',
+    agendaSubtitle:
+      'See launches, live classes, and special events in one place to plan your learning.',
     filters: 'Filters',
     today: 'Today',
     more: 'more',
