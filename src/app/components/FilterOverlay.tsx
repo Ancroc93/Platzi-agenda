@@ -137,7 +137,7 @@ export const FilterOverlay = ({
 
         {/* Categorías */}
         <section>
-          <h3 className="text-[10px] font-bold text-[#898F9D] uppercase tracking-wider mb-4">Categorías</h3>
+          <h3 className="text-white font-bold text-base leading-snug transition-colors mb-4">Categorías</h3>
           <div className="space-y-3">
             {DIVULGACION_CATEGORIES.map(cat => (
               <CategoryCheckbox key={cat} cat={cat} />
@@ -148,7 +148,7 @@ export const FilterOverlay = ({
         {/* Escuelas */}
         {availableSchools.length > 0 && (
           <section>
-            <h3 className="text-[10px] font-bold text-[#898F9D] uppercase tracking-wider mb-4">Escuelas</h3>
+            <h3 className="text-white font-bold text-base leading-snug transition-colors mb-4">Escuelas</h3>
             <div className="space-y-3 pb-8">
               {availableSchools.map(school => {
                 const isSelected = filterSchools.includes(school);

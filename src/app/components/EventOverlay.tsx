@@ -1,12 +1,13 @@
 import { motion, AnimatePresence, useDragControls } from 'motion/react';
 import {
-  X, Clock, CalendarDays,
+  X, Clock, CalendarDays, CheckCircle2,
   Code2, Globe, Megaphone, Brain, Shield, Users, PenLine,
   Smartphone, Video, DollarSign, Cloud, Terminal, Palette,
   Boxes, UserPlus, Rocket, Briefcase, BookOpen,
   type LucideIcon,
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { useEffect, useState } from 'react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { PlatziEvent } from '../data/events';
@@ -58,6 +59,44 @@ interface EventOverlayProps {
   event: PlatziEvent;
   onClose: () => void;
 }
+
+type OverlayCtaState = 'default' | 'added' | 'registered';
+
+const GOOGLE_CALENDAR_BASE_URL = 'https://calendar.google.com/calendar/render';
+const pad = (n: number) => String(n).padStart(2, '0');
+const toGoogleDateTimeUtc = (d: Date) =>
+  `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
+const toGoogleDate = (d: Date) =>
+  `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}`;
+
+const buildGoogleCalendarUrl = (event: PlatziEvent) => {
+  const start = new Date(event.date);
+  const end = new Date(event.date.getTime() + event.durationMinutes * 60_000);
+
+  const details = [
+    event.description,
+    event.instructor ? `Instructor: ${event.instructor}` : null,
+    event.school ? `Escuela: ${event.school}` : null,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: event.title,
+    details,
+  });
+
+  if (event.isAllDay) {
+    const endExclusive = new Date(end);
+    endExclusive.setUTCDate(endExclusive.getUTCDate() + 1);
+    params.set('dates', `${toGoogleDate(start)}/${toGoogleDate(endExclusive)}`);
+  } else {
+    params.set('dates', `${toGoogleDateTimeUtc(start)}/${toGoogleDateTimeUtc(end)}`);
+  }
+
+  return `${GOOGLE_CALENDAR_BASE_URL}?${params.toString()}`;
+};
 
 export const EventOverlay = ({ event, onClose }: EventOverlayProps) => {
   const dragControls = useDragControls();
@@ -128,6 +167,12 @@ export const EventOverlay = ({ event, onClose }: EventOverlayProps) => {
 
 const OverlayContent = ({ event, onClose }: { event: PlatziEvent, onClose: () => void }) => {
   const { dateLocale } = useI18n();
+  const [ctaState, setCtaState] = useState<OverlayCtaState>('default');
+  const isLiveCta = event.isLive;
+
+  useEffect(() => {
+    setCtaState('default');
+  }, [event.id]);
 
   // Categorías que usan el fondo de Platzi Live
   const usesPlatziLiveBg =
@@ -229,13 +274,64 @@ const OverlayContent = ({ event, onClose }: { event: PlatziEvent, onClose: () =>
 
       {/* CTA */}
       <div className="p-6 border-t border-[#1D293D] bg-[#0D0F12] w-full mt-auto shrink-0 z-20">
-        <button className="w-full py-2.5 px-3 font-bold text-sm rounded-xl transition-colors shadow-sm bg-white hover:bg-slate-200 text-black">
-          {event.isCourse ? (
+        <button
+          type="button"
+          onClick={() => {
+            if (event.eventType === 'promocion') {
+              const promoUrl =
+                event.category === 'Platzi Gratis'
+                  ? 'https://platzi.com/cursos/'
+                  : event.category === 'Descuentos y promociones'
+                    ? 'https://platzi.com/precios/'
+                  : 'https://platzi.com/conf/';
+              window.open(promoUrl, '_blank', 'noopener,noreferrer');
+              return;
+            }
+            if (!isLiveCta) return;
+            if (ctaState === 'default') {
+              setCtaState('added');
+              return;
+            }
+            if (ctaState === 'added') {
+              window.open(buildGoogleCalendarUrl(event), '_blank', 'noopener,noreferrer');
+              setCtaState('registered');
+            }
+          }}
+          className={cn(
+            "w-full py-2.5 px-3 font-bold text-sm rounded-xl transition-colors shadow-sm",
+            isLiveCta
+              ? ctaState === 'added'
+                ? "bg-[#0A0F18] border border-[#1D293D] text-white hover:bg-[#131A28] flex items-center justify-center gap-3"
+                : ctaState === 'registered'
+                  ? "bg-[#0A0F18] border border-[#1D293D] text-white flex items-center justify-center gap-2 cursor-default"
+                  : "bg-white hover:bg-slate-200 text-black"
+              : "bg-white hover:bg-slate-200 text-black",
+          )}
+        >
+          {isLiveCta ? (
+            ctaState === 'added' ? (
+              <>
+                <span className="font-bold tracking-tight">Agregar</span>
+                <CalendarDays className="w-5 h-5 text-white shrink-0" strokeWidth={2.2} />
+              </>
+            ) : ctaState === 'registered' ? (
+              <>
+                <span>Asistiré</span>
+                <CheckCircle2 className="w-4 h-4 text-[#00ED80] shrink-0" />
+              </>
+            ) : (
+              <>Regístrate gratis</>
+            )
+          ) : event.isCourse ? (
             <>Empezar Curso</>
-          ) : event.isLive ? (
-            <>Regístrate gratis</>
           ) : event.eventType === 'promocion' ? (
-            <>Aprovechar Promoción</>
+            <>
+              {event.category === 'Platzi Gratis'
+                ? 'Comienza a aprender'
+                : event.category === 'Descuentos y promociones'
+                  ? 'Ir a ofertas'
+                  : 'Ver evento'}
+            </>
           ) : (
             <>Ver Detalles Completos</>
           )}

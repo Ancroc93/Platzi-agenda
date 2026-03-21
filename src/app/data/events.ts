@@ -2,29 +2,14 @@
 // TYPES
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Dos categorías principales según el PRD:
- * - promocion  → se muestran como "Día completo" en el calendario
- * - divulgacion → se muestran en horarios específicos
- */
 export type EventType = 'promocion' | 'divulgacion';
 
-/**
- * Categorías de Divulgación (horario específico):
- *   Platzi Live · Lanzamiento de cursos · Clases Platzi Master
- *   Clases abiertas al público · Platzi CONF Charla
- *
- * Categorías de Promoción (día completo):
- *   Platzi Gratis · Descuentos y promociones · Platzi CONF
- */
 export type EventCategory =
-  // Divulgación
   | 'Platzi Live'
   | 'Lanzamiento de cursos'
   | 'Clases Platzi Master'
   | 'Clases abiertas al público'
   | 'Platzi CONF Charla'
-  // Promoción
   | 'Platzi Gratis'
   | 'Descuentos y promociones'
   | 'Platzi CONF';
@@ -33,17 +18,13 @@ export interface PlatziEvent {
   id: string;
   title: string;
   category: EventCategory;
-  /** Clasificación principal según el PRD */
   eventType: EventType;
-  /** true → se muestra en la franja "Todo el día"; false → posicionado por hora */
   isAllDay: boolean;
   isLive: boolean;
   isCourse: boolean;
   isFree: boolean;
   school?: string;
-  /** Para eventos de día completo (isAllDay=true): hora ignorada, se usa durationMinutes para calcular el rango de días */
   date: Date;
-  /** En minutos. Para eventos de día completo: múltiplos de 1440 (1 día = 1440 min) */
   durationMinutes: number;
   tags: string[];
   description: string;
@@ -53,44 +34,243 @@ export interface PlatziEvent {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// DATE HELPERS
+// BASE DATA (4-MONTH SCENARIO)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const today = new Date();
-const currentYear = today.getFullYear();
+const TODAY = new Date();
+const FOUR_MONTHS_END = new Date(TODAY);
+FOUR_MONTHS_END.setMonth(FOUR_MONTHS_END.getMonth() + 4);
+
+const LEARNING_SCHOOLS = [
+  'Desarrollo Web',
+  'English Academy',
+  'Marketing Digital',
+  'Inteligencia Artificial y Data Science',
+  'Ciberseguridad',
+  'Liderazgo y Habilidades Blandas',
+  'Diseño de Producto y UX',
+  'Desarrollo Móvil',
+  'Contenido Audiovisual',
+  'Finanzas e Inversiones',
+  'Cloud Computing y DevOps',
+  'Programación',
+  'Diseño Gráfico y Arte Digital',
+  'Blockchain y Web3',
+  'Recursos Humanos',
+  'Startups',
+  'Negocios',
+  'Arquitectura',
+];
+
+const MASTER_TOPICS = [
+  'Arquitecturas escalables',
+  'Automatización con IA',
+  'Optimización de performance',
+  'Diseño de producto orientado a datos',
+  'Seguridad aplicada',
+  'Estrategias de crecimiento',
+  'Colaboración efectiva en equipos',
+  'Roadmaps de aprendizaje',
+];
+
+const FREE_TOPICS = [
+  'Introducción práctica',
+  'Fundamentos en 60 minutos',
+  'Primeros pasos guiados',
+  'Taller para principiantes',
+  'Sesión abierta de dudas',
+];
+
+const COURSE_LAUNCHES = [
+  'Curso de React Avanzado para Equipos',
+  'Curso de Python para Análisis de Datos',
+  'Curso de Ciberseguridad Defensiva',
+  'Curso de UX Writing para Producto',
+  'Curso de IA Generativa para Marketing',
+  'Curso de Arquitectura de Microservicios',
+  'Curso de Liderazgo Técnico',
+  'Curso de Estrategia de Negocios Digitales',
+];
+
+const SPEAKERS = [
+  { name: 'Camila Torres', role: 'Senior Learning Coach' },
+  { name: 'Diego Cueva', role: 'Principal Engineer' },
+  { name: 'Laura Pérez', role: 'Community Educator' },
+  { name: 'Andrés Jaramillo', role: 'Lead Instructor' },
+  { name: 'María Camacho', role: 'Product Education Manager' },
+  { name: 'Santiago Rojas', role: 'Tech Mentor' },
+  { name: 'Valentina Ruiz', role: 'Growth Specialist' },
+  { name: 'Julián Ocampo', role: 'Curriculum Designer' },
+];
+
+const OVERLOADED_DAY_OFFSETS = [4, 15, 29, 43, 57, 72, 89, 104];
+const OVERLOADED_DAY_TIMES = [
+  { h: 9, m: 0 },
+  { h: 9, m: 30 },
+  { h: 10, m: 0 },
+  { h: 10, m: 30 },
+];
+const DISTRIBUTED_TIMES = [
+  { h: 8, m: 30 },
+  { h: 10, m: 0 },
+  { h: 11, m: 30 },
+  { h: 14, m: 0 },
+  { h: 15, m: 30 },
+  { h: 17, m: 0 },
+  { h: 18, m: 30 },
+];
+
+const TECH_IMAGE_POOL = [
+  'https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&q=80&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=900&q=80&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1484417894907-623942c8ee29?w=900&q=80&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=900&q=80&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=900&q=80&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=900&q=80&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=900&q=80&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=900&q=80&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=900&q=80&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?w=900&q=80&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=900&q=80&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=900&q=80&auto=format&fit=crop',
+];
+
+const pickTechImage = (seed: string) => {
+  const hash = Array.from(seed).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  return TECH_IMAGE_POOL[hash % TECH_IMAGE_POOL.length];
+};
+
+const seedImg = (seed: string) => pickTechImage(seed);
 
 const createDate = (dayOffset: number, hour: number, minute = 0): Date => {
-  const d = new Date(today);
+  const d = new Date(TODAY);
   d.setDate(d.getDate() + dayOffset);
   d.setHours(hour, minute, 0, 0);
   return d;
 };
 
-/**
- * Devuelve todos los jueves del año actual a las 16:00 (hora Colombia, UTC-5).
- * Platzi Live se transmite cada jueves de 4 pm a 7 pm.
- */
-const getThursdaysOfYear = (): Date[] => {
-  const thursdays: Date[] = [];
-  const jan1 = new Date(currentYear, 0, 1);
-  // getDay(): 0=Dom … 4=Jue … 6=Sáb
-  const firstThursdayOffset = (4 - jan1.getDay() + 7) % 7;
-  let d = new Date(currentYear, 0, 1 + firstThursdayOffset);
-  while (d.getFullYear() === currentYear) {
-    const slot = new Date(d);
-    slot.setHours(16, 0, 0, 0); // 4:00 pm Colombia
-    thursdays.push(slot);
-    d = new Date(d.getTime() + 7 * 24 * 60 * 60 * 1000);
+const getSlotDate = (slotIndex: number): Date => {
+  if (slotIndex < OVERLOADED_DAY_OFFSETS.length * 4) {
+    const day = OVERLOADED_DAY_OFFSETS[Math.floor(slotIndex / 4)];
+    const t = OVERLOADED_DAY_TIMES[slotIndex % OVERLOADED_DAY_TIMES.length];
+    return createDate(day, t.h, t.m);
   }
-  return thursdays;
+
+  const n = slotIndex - OVERLOADED_DAY_OFFSETS.length * 4;
+  const dayOffset = ((n * 5) % 112) + 3 + (n % 3);
+  const t = DISTRIBUTED_TIMES[n % DISTRIBUTED_TIMES.length];
+  return createDate(Math.min(dayOffset, 118), t.h, t.m);
 };
 
+const speakerByIndex = (i: number) => SPEAKERS[i % SPEAKERS.length];
+
+const schoolShort = (school: string) => school.replace(/^Escuela de\s+/i, '').trim();
+
 // ─────────────────────────────────────────────────────────────────────────────
-// PLATZI LIVE — Auto-generado (todos los jueves del año)
+// GENERATED EVENTS
 // ─────────────────────────────────────────────────────────────────────────────
 
-const PLATZI_LIVE_EVENTS: PlatziEvent[] = getThursdaysOfYear().map((date, i) => ({
-  id: `pl-${i + 1}`,
+const MASTER_EVENTS: PlatziEvent[] = LEARNING_SCHOOLS.flatMap((school, schoolIdx) =>
+  [0, 1].map((n) => {
+    const slot = schoolIdx * 2 + n;
+    const speaker = speakerByIndex(slot + 2);
+    const topic = MASTER_TOPICS[(schoolIdx + n) % MASTER_TOPICS.length];
+    return {
+      id: `master-${schoolIdx + 1}-${n + 1}`,
+      title: `Masterclass: ${topic} en ${schoolShort(school)}`,
+      category: 'Clases Platzi Master' as EventCategory,
+      eventType: 'divulgacion' as EventType,
+      isAllDay: false,
+      isLive: true,
+      isCourse: false,
+      isFree: false,
+      school,
+      date: getSlotDate(slot),
+      durationMinutes: n === 0 ? 90 : 120,
+      tags: ['Master', schoolShort(school)],
+      description:
+        `Sesión avanzada enfocada en ${topic.toLowerCase()} aplicada a retos reales de ${schoolShort(school)}.\n\n` +
+        'Trabajaremos casos prácticos, resolución en vivo y buenas prácticas para llevar lo aprendido a tu día a día.\n\n' +
+        'Incluye espacio de preguntas y recursos descargables para continuar profundizando.',
+      imageUrl: seedImg(`master-${schoolIdx}-${n}`),
+      instructor: speaker.name,
+      instructorRole: speaker.role,
+    };
+  }),
+);
+
+const FREE_EVENTS: PlatziEvent[] = LEARNING_SCHOOLS.map((school, schoolIdx) => {
+  const slot = 32 + schoolIdx;
+  const speaker = speakerByIndex(slot + 4);
+  const topic = FREE_TOPICS[schoolIdx % FREE_TOPICS.length];
+  return {
+    id: `free-${schoolIdx + 1}`,
+    title: `Clase gratuita: ${topic} de ${schoolShort(school)}`,
+    category: 'Clases abiertas al público' as EventCategory,
+    eventType: 'divulgacion' as EventType,
+    isAllDay: false,
+    isLive: true,
+    isCourse: false,
+    isFree: true,
+    school,
+    date: getSlotDate(slot),
+    durationMinutes: 60,
+    tags: ['Gratis', schoolShort(school)],
+    description:
+      `Clase abierta para descubrir los fundamentos de ${schoolShort(school)}.\n\n` +
+      'Ideal para iniciar desde cero: veremos conceptos clave, una demo guiada y recomendaciones para seguir aprendiendo.\n\n' +
+      'No requiere experiencia previa y queda grabada para quienes se registren.',
+    imageUrl: seedImg(`free-${schoolIdx}`),
+    instructor: speaker.name,
+    instructorRole: 'Instructor(a) Invitado(a)',
+  };
+});
+
+const COURSE_LAUNCH_EVENTS: PlatziEvent[] = COURSE_LAUNCHES.map((courseTitle, i) => {
+  const slot = 32 + LEARNING_SCHOOLS.length + i;
+  const school = LEARNING_SCHOOLS[i % LEARNING_SCHOOLS.length];
+  const speaker = speakerByIndex(slot + 7);
+  return {
+    id: `launch-${i + 1}`,
+    title: `Lanzamiento: ${courseTitle}`,
+    category: 'Lanzamiento de cursos' as EventCategory,
+    eventType: 'divulgacion' as EventType,
+    isAllDay: false,
+    isLive: false,
+    isCourse: true,
+    isFree: i % 3 === 0,
+    school,
+    date: getSlotDate(slot),
+    durationMinutes: i % 2 === 0 ? 90 : 120,
+    tags: ['Lanzamiento', schoolShort(school)],
+    description:
+      `Presentamos ${courseTitle}, un curso creado para acelerar tu progreso en ${schoolShort(school)}.\n\n` +
+      'Revisaremos el temario, proyectos incluidos, nivel recomendado y ruta sugerida para aprovecharlo al máximo.\n\n' +
+      'Al finalizar conocerás cómo integrarlo en tu plan semanal de estudio.',
+    imageUrl: seedImg(`launch-${i}`),
+    instructor: speaker.name,
+    instructorRole: 'Autor(a) del curso',
+  };
+});
+
+// Platzi Live semanal durante los próximos 4 meses.
+const getNextThursdays = (): Date[] => {
+  const dates: Date[] = [];
+  const d = new Date(TODAY);
+  const day = d.getDay(); // 4 = jueves
+  const offset = (4 - day + 7) % 7;
+  d.setDate(d.getDate() + offset);
+  d.setHours(16, 0, 0, 0);
+
+  while (d <= FOUR_MONTHS_END) {
+    dates.push(new Date(d));
+    d.setDate(d.getDate() + 7);
+  }
+  return dates;
+};
+
+const PLATZI_LIVE_EVENTS: PlatziEvent[] = getNextThursdays().map((date, i) => ({
+  id: `pl-live-${i + 1}`,
   title: 'Platzi Live',
   category: 'Platzi Live' as EventCategory,
   eventType: 'divulgacion' as EventType,
@@ -99,262 +279,131 @@ const PLATZI_LIVE_EVENTS: PlatziEvent[] = getThursdaysOfYear().map((date, i) => 
   isCourse: false,
   isFree: true,
   date,
-  durationMinutes: 180, // 4 pm → 7 pm
+  durationMinutes: 180,
   tags: ['Comunidad', 'En vivo'],
   description:
-    'Platzi Live es un espacio de aprendizaje en vivo donde la comunidad TECH se reúne para aprender, interactuar y crecer en conjunto 🚀.\n\nAquí aprendes con las personas más TOP en IA, marketing, programación, liderazgo, y mucho más.\n\nLa agenda estará pronto disponible, pero te aseguramos que estará increíble, así que regístrate YA.\n\n¿Quieres que hablemos de un tema? Escríbenos en team@platzi.com',
+    'Platzi Live es un espacio para aprender, compartir y crecer en comunidad con referentes del ecosistema tech.\n\n' +
+    'En cada edición abordamos un tema actual con ejemplos prácticos, casos reales y una sesión abierta de preguntas.\n\n' +
+    'Regístrate para recibir recordatorio y materiales complementarios.',
+  imageUrl: seedImg(`platzi-live-${i}`),
   instructor: 'Freddy Vega',
   instructorRole: 'CEO de Platzi',
 }));
 
-// ─────────────────────────────────────────────────────────────────────────────
-// EVENTOS MANUALES
-// ─────────────────────────────────────────────────────────────────────────────
-
-const MANUAL_EVENTS: PlatziEvent[] = [
-
-  // ── Divulgación: Lanzamiento de cursos ────────────────────────────────────
-
+const FULL_DAY_PROMO_EVENTS: PlatziEvent[] = [
   {
-    id: 'e1',
-    title: 'Curso de Fundamentos de Computación e Informática',
-    category: 'Lanzamiento de cursos',
-    eventType: 'divulgacion',
-    isAllDay: false,
-    isCourse: true,
-    isLive: false,
-    isFree: true,
-    school: 'Escuela de Desarrollo Web',
-    date: createDate(0, 9, 0),
-    durationMinutes: 120,
-    tags: ['Nuevo', 'Básico'],
-    description:
-      'Domina lo esencial: periféricos, puertos USB-C/HDMI/Ethernet, CPU, RAM y SSD. El punto de partida ideal para tu carrera tech.',
-    imageUrl: 'https://images.unsplash.com/photo-1547082299-de196ea013d6?w=800&q=80',
-    instructor: 'Jhon Carvajal',
-    instructorRole: 'Profesor',
-  },
-  {
-    id: 'e2',
-    title: 'Curso de ChatGPT Avanzado',
-    category: 'Lanzamiento de cursos',
-    eventType: 'divulgacion',
-    isAllDay: false,
-    isCourse: true,
-    isLive: false,
-    isFree: false,
-    school: 'Escuela de Inteligencia Artificial y Data Science',
-    date: createDate(3, 10, 0),
-    durationMinutes: 180,
-    tags: ['Próximamente', 'IA'],
-    description:
-      'Crea prompts complejos, conecta APIs de OpenAI y construye tus propios agentes inteligentes con las últimas técnicas de prompt engineering.',
-    imageUrl: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80',
-    instructor: 'Rodrigo Rojo',
-    instructorRole: 'Experto en IA',
-  },
-  {
-    id: 'e3',
-    title: 'Curso de Fundamentos de .NET',
-    category: 'Lanzamiento de cursos',
-    eventType: 'divulgacion',
-    isAllDay: false,
-    isCourse: true,
-    isLive: false,
-    isFree: false,
-    school: 'Escuela de Desarrollo Web',
-    date: createDate(-4, 11, 0),
-    durationMinutes: 150,
-    tags: ['Nuevo', '.NET'],
-    description:
-      'Inicia tu camino en el ecosistema de Microsoft. Crea APIs modernas y escalables con C# y .NET 8.',
-    imageUrl: 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80',
-    instructor: 'Sebastián Martínez',
-    instructorRole: 'Backend Dev',
-  },
-
-  // ── Divulgación: Clases Platzi Master ─────────────────────────────────────
-
-  {
-    id: 'e4',
-    title: 'Taller en vivo: Testing de Frontend con React',
-    category: 'Clases Platzi Master',
-    eventType: 'divulgacion',
-    isAllDay: false,
-    isCourse: false,
-    isLive: true,
-    isFree: false,
-    school: 'Escuela de Desarrollo Web',
-    date: createDate(2, 19, 0),
-    durationMinutes: 90,
-    tags: ['Master', 'Frontend'],
-    description:
-      'Sesión en vivo: estrategias de testing en React con Vitest y Testing Library aplicadas a casos reales de producción.',
-    instructor: 'Camila Torres',
-    instructorRole: 'Frontend Engineer',
-  },
-  {
-    id: 'e5',
-    title: 'Taller en vivo: Diseño de APIs con Node.js',
-    category: 'Clases Platzi Master',
-    eventType: 'divulgacion',
-    isAllDay: false,
-    isCourse: false,
-    isLive: true,
-    isFree: false,
-    school: 'Escuela de Desarrollo Web',
-    date: createDate(6, 18, 30),
-    durationMinutes: 120,
-    tags: ['Master', 'Backend', 'APIs'],
-    description:
-      'Construye una API robusta con Node.js: versionado, manejo de errores y buenas prácticas para entornos productivos.',
-    instructor: 'Diego Cueva',
-    instructorRole: 'Backend Tech Lead',
-  },
-
-  // ── Divulgación: Clases abiertas al público ───────────────────────────────
-
-  {
-    id: 'e6',
-    title: 'Clase abierta: Introducción a Python desde cero',
-    category: 'Clases abiertas al público',
-    eventType: 'divulgacion',
-    isAllDay: false,
-    isCourse: false,
-    isLive: true,
-    isFree: true,
-    school: 'Escuela de Programación',
-    date: createDate(4, 17, 0),
-    durationMinutes: 60,
-    tags: ['Gratis', 'Básico', 'Python'],
-    description:
-      'Clase gratuita y abierta para quienes quieren dar sus primeros pasos en programación con Python. Sin requisitos previos.',
-    instructor: 'Laura Pérez',
-    instructorRole: 'Instructora de Programación',
-  },
-  {
-    id: 'e7',
-    title: 'Clase abierta: Cómo empezar en ciberseguridad',
-    category: 'Clases abiertas al público',
-    eventType: 'divulgacion',
-    isAllDay: false,
-    isCourse: false,
-    isLive: true,
-    isFree: true,
-    school: 'Escuela de Ciberseguridad',
-    date: createDate(10, 16, 0),
-    durationMinutes: 60,
-    tags: ['Gratis', 'Ciberseguridad'],
-    description:
-      'Perfiles de trabajo en ciberseguridad, habilidades más demandadas y cómo iniciar tu carrera en este campo tan crítico.',
-    instructor: 'Carlos Mendoza',
-    instructorRole: 'Especialista en Seguridad',
-  },
-
-  // ── Divulgación: Platzi CONF Charlas ──────────────────────────────────────
-
-  {
-    id: 'e8',
-    title: 'CONF: El futuro del trabajo en la era de la IA',
-    category: 'Platzi CONF Charla',
-    eventType: 'divulgacion',
-    isAllDay: false,
-    isCourse: false,
-    isLive: false,
-    isFree: false,
-    date: createDate(20, 10, 0),
-    durationMinutes: 60,
-    tags: ['CONF', 'IA', 'Trabajo'],
-    description:
-      'Cómo los modelos de lenguaje grande redefinen los roles profesionales y qué habilidades serán más valiosas en la próxima década.',
-    instructor: 'Ana García',
-    instructorRole: 'Investigadora del Futuro del Trabajo',
-  },
-  {
-    id: 'e9',
-    title: 'CONF: IA en la educación latinoamericana',
-    category: 'Platzi CONF Charla',
-    eventType: 'divulgacion',
-    isAllDay: false,
-    isCourse: false,
-    isLive: false,
-    isFree: false,
-    date: createDate(20, 12, 0),
-    durationMinutes: 45,
-    tags: ['CONF', 'IA', 'Educación'],
-    description:
-      'Cómo plataformas de aprendizaje adaptan la IA generativa para personalizar trayectorias y democratizar la educación técnica en LATAM.',
-    instructor: 'Freddy Vega',
-    instructorRole: 'CEO de Platzi',
-  },
-
-  // ── Promoción: Platzi Gratis ───────────────────────────────────────────────
-
-  {
-    id: 'e10',
+    id: 'promo-free-1',
     title: 'Platzi Day: 48 horas de acceso libre',
     category: 'Platzi Gratis',
     eventType: 'promocion',
     isAllDay: true,
-    isCourse: false,
     isLive: false,
+    isCourse: false,
     isFree: true,
-    date: createDate(5, 0, 0),
-    durationMinutes: 2 * 24 * 60, // 2 días
-    tags: ['Promo', 'Gratis'],
+    date: createDate(11, 0, 0),
+    durationMinutes: 2 * 24 * 60,
+    tags: ['Promo', 'Gratis', 'Acceso libre'],
     description:
-      'Abre todas las escuelas y cursos de Platzi sin costo durante 48 horas. ¡Aprovecha para aprender lo que siempre quisiste!',
+      'Durante 48 horas tendrás acceso abierto a rutas de aprendizaje seleccionadas para que explores nuevos temas y avances a tu ritmo.\n\n' +
+      'Activa recordatorios para no perderte los contenidos clave y comparte el evento con tu equipo.',
+    imageUrl: seedImg('promo-free-1'),
+    instructor: 'Team Platzi',
+    instructorRole: 'Community Team',
   },
-
-  // ── Promoción: Descuentos y promociones ───────────────────────────────────
-
   {
-    id: 'e11',
-    title: 'Cyber Monday Platzi: 40% de descuento',
+    id: 'promo-discount-1',
+    title: 'Flash Sale: 40% de descuento en planes anuales',
     category: 'Descuentos y promociones',
     eventType: 'promocion',
     isAllDay: true,
-    isCourse: false,
     isLive: false,
+    isCourse: false,
     isFree: false,
-    date: createDate(14, 0, 0),
-    durationMinutes: 24 * 60, // 1 día
-    tags: ['Promo', 'Descuento'],
+    date: createDate(24, 0, 0),
+    durationMinutes: 24 * 60,
+    tags: ['Descuento', 'Oferta', 'Planes'],
     description:
-      'Solo por 24 horas: accede al plan anual con 40% de descuento. La oferta más grande del año en Platzi.',
+      'Promoción de un día para renovar o activar plan anual con 40% de descuento.\n\n' +
+      'Revisa las condiciones de la oferta y los beneficios incluidos antes de finalizar tu compra.',
+    imageUrl: seedImg('promo-discount-1'),
+    instructor: 'Valentina Ruiz',
+    instructorRole: 'Growth Specialist',
   },
   {
-    id: 'e12',
-    title: 'Semana de descuentos: planes anuales',
-    category: 'Descuentos y promociones',
-    eventType: 'promocion',
-    isAllDay: true,
-    isCourse: false,
-    isLive: false,
-    isFree: false,
-    date: createDate(28, 0, 0),
-    durationMinutes: 7 * 24 * 60, // 7 días
-    tags: ['Promo', 'Descuento', 'Semana'],
-    description:
-      'Una semana completa de precios especiales en todos los planes de Platzi. Comparte con tu equipo y aprendan juntos.',
-  },
-
-  // ── Promoción: Platzi CONF ─────────────────────────────────────────────────
-
-  {
-    id: 'e13',
+    id: 'promo-conf-1',
     title: 'Platzi CONF 2026',
     category: 'Platzi CONF',
     eventType: 'promocion',
     isAllDay: true,
-    isCourse: false,
     isLive: false,
+    isCourse: false,
     isFree: false,
-    date: createDate(20, 0, 0),
-    durationMinutes: 3 * 24 * 60, // 3 días
-    tags: ['CONF', 'Presencial'],
+    date: new Date(TODAY.getFullYear(), 4, 16, 0, 0, 0, 0),
+    durationMinutes: 24 * 60,
+    tags: ['CONF', 'Networking', 'Comunidad'],
     description:
-      'La conferencia de tecnología y educación más grande de Latinoamérica. Tres días de charlas, talleres y networking con los mejores referentes del ecosistema tech.',
+      'Tres días de charlas, talleres y networking con speakers del ecosistema tech de Latinoamérica.\n\n' +
+      'Consulta la agenda oficial para conocer las franjas temáticas y actividades especiales.',
+    imageUrl: seedImg('promo-conf-1'),
+    instructor: 'Freddy Vega',
+    instructorRole: 'Host',
+  },
+  {
+    id: 'promo-free-2',
+    title: 'Platzi Gratis Weekend',
+    category: 'Platzi Gratis',
+    eventType: 'promocion',
+    isAllDay: true,
+    isLive: false,
+    isCourse: false,
+    isFree: true,
+    date: createDate(63, 0, 0),
+    durationMinutes: 2 * 24 * 60,
+    tags: ['Gratis', 'Weekend'],
+    description:
+      'Fin de semana abierto con clases destacadas y rutas introductorias para nuevos estudiantes.\n\n' +
+      'Aprovecha para probar escuelas diferentes y definir tu plan de estudio del próximo mes.',
+    imageUrl: seedImg('promo-free-2'),
+    instructor: 'Laura Pérez',
+    instructorRole: 'Community Educator',
+  },
+  {
+    id: 'promo-discount-2',
+    title: 'Semana de descuentos: ruta completa de IA',
+    category: 'Descuentos y promociones',
+    eventType: 'promocion',
+    isAllDay: true,
+    isLive: false,
+    isCourse: false,
+    isFree: false,
+    date: createDate(82, 0, 0),
+    durationMinutes: 7 * 24 * 60,
+    tags: ['Descuento', 'IA', 'Semana'],
+    description:
+      'Precio especial por una semana para rutas de Inteligencia Artificial y Data Science.\n\n' +
+      'Incluye recomendaciones de cursos para perfiles de producto, ingeniería y marketing.',
+    imageUrl: seedImg('promo-discount-2'),
+    instructor: 'Andrés Jaramillo',
+    instructorRole: 'Lead Instructor',
+  },
+  {
+    id: 'promo-conf-2',
+    title: 'Platzi CONF Global Sessions',
+    category: 'Platzi CONF',
+    eventType: 'promocion',
+    isAllDay: true,
+    isLive: false,
+    isCourse: false,
+    isFree: false,
+    date: createDate(104, 0, 0),
+    durationMinutes: 24 * 60,
+    tags: ['CONF', 'Global', 'Sessions'],
+    description:
+      'Edición especial de CONF con sesiones globales y paneles temáticos en formato híbrido.\n\n' +
+      'Consulta speakers invitados, horarios y enlaces de transmisión para cada sala.',
+    imageUrl: seedImg('promo-conf-2'),
+    instructor: 'Santiago Rojas',
+    instructorRole: 'Tech Mentor',
   },
 ];
 
@@ -362,4 +411,12 @@ const MANUAL_EVENTS: PlatziEvent[] = [
 // EXPORT
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const MOCK_EVENTS: PlatziEvent[] = [...PLATZI_LIVE_EVENTS, ...MANUAL_EVENTS];
+export const MOCK_EVENTS: PlatziEvent[] = [
+  ...MASTER_EVENTS,
+  ...FREE_EVENTS,
+  ...COURSE_LAUNCH_EVENTS,
+  ...PLATZI_LIVE_EVENTS,
+  ...FULL_DAY_PROMO_EVENTS,
+]
+  .filter((e) => e.date >= TODAY && e.date <= FOUR_MONTHS_END)
+  .sort((a, b) => a.date.getTime() - b.date.getTime());

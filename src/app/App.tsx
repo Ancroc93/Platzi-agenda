@@ -56,7 +56,7 @@ const CATEGORY_COLORS: Record<EventCategory, string> = {
   // Divulgación
   'Platzi Live':              'bg-[#F23A3A]',
   'Lanzamiento de cursos':    'bg-[#2D7AEB]',
-  'Clases Platzi Master':     'bg-[#F5B402]',
+  'Clases Platzi Master':     'bg-[#06B6D4]',
   'Clases abiertas al público': 'bg-[#8E55EA]',
   'Platzi CONF Charla':       'bg-[#33B864]',
   // Promoción
@@ -69,7 +69,7 @@ const CATEGORY_COLORS: Record<EventCategory, string> = {
 const CATEGORY_HEX: Record<EventCategory, string> = {
   'Platzi Live':              '#F23A3A',
   'Lanzamiento de cursos':    '#2D7AEB',
-  'Clases Platzi Master':     '#F5B402',
+  'Clases Platzi Master':     '#06B6D4',
   'Clases abiertas al público': '#8E55EA',
   'Platzi CONF Charla':       '#33B864',
   'Platzi Gratis':            '#00ED80',
@@ -445,11 +445,6 @@ const MonthView = ({
                   )}>
                     {format(day, 'd')}
                   </span>
-                  {timedEvents.length > 0 && (
-                    <span className="text-[10px] text-[#898F9D] font-bold hidden sm:block uppercase tracking-wider mt-1">
-                      {timedEvents.length} {timedEvents.length === 1 ? t('evt') : t('evts')}
-                    </span>
-                  )}
                 </div>
               )}
 
@@ -575,12 +570,17 @@ const YearView = ({
               : null;
 
             return (
-              <div
+              <button
+                type="button"
                 key={`day-${day.toISOString()}-${idx}`}
+                onClick={() => {
+                  setCurrentDate(day);
+                  setViewMode('day');
+                }}
                 className={cn(
-                  "aspect-square flex items-center justify-center text-[10px] rounded-full relative overflow-hidden",
+                  "aspect-square flex items-center justify-center text-[10px] rounded-full relative overflow-hidden transition-colors",
                   !isCurrentMonth
-                    ? "text-slate-700"
+                    ? "text-slate-700 hover:text-[#90A1B9]"
                     : isToday(day)
                       ? "bg-[#00ED80] text-slate-900 font-bold"
                       : "text-[#90A1B9]",
@@ -589,6 +589,7 @@ const YearView = ({
                 style={allDayAccent && !isToday(day) ? {
                   boxShadow: `0 0 0 1.5px ${allDayAccent}`,
                 } : undefined}
+                aria-label={`Ir al día ${format(day, 'd MMMM yyyy', { locale: dateLocale })}`}
               >
                 {/* Tinte sutil para días con evento de día completo */}
                 {allDayAccent && !isToday(day) && (
@@ -604,7 +605,7 @@ const YearView = ({
                     style={{ backgroundColor: allDayAccent ?? '#00ED80' }}
                   />
                 )}
-              </div>
+              </button>
             );
           })}
         </div>
@@ -915,10 +916,10 @@ const Agenda = () => {
             <div className="relative">
               <button 
                 onClick={() => setIsViewMenuOpen(!isViewMenuOpen)}
-                className="flex items-center gap-4 bg-[#13171B] border border-[#898F9D] rounded-xl px-0 py-3 text-sm font-semibold text-white hover:bg-[#1C2230] transition-colors w-full min-w-[100px] justify-center"
+                className="flex items-center gap-4 bg-[#13171B] border border-[#1D293D] rounded-xl px-0 py-3 text-sm font-semibold text-white hover:bg-[#1C2230] transition-colors w-full min-w-[100px] justify-center"
               >
                 {viewOptionsForDevice.find(o => o.id === viewMode)?.label ?? 'Mes'}
-                <ChevronDown className={cn("w-4 h-4 text-[#898F9D] transition-transform duration-200", isViewMenuOpen && "rotate-180")} />
+                <ChevronDown className={cn("w-4 h-4 text-[#62748E] transition-transform duration-200", isViewMenuOpen && "rotate-180")} />
               </button>
               
               <AnimatePresence>
@@ -930,13 +931,16 @@ const Agenda = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute top-full mt-2 left-0 w-48 bg-[#1C2230] border border-[#898F9D] rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden"
+                      className="absolute top-full mt-2 left-0 w-48 bg-[#13171B] border border-[#1D293D] rounded-xl shadow-2xl z-50 py-1.5 overflow-hidden"
                     >
                       {viewOptionsForDevice.map((option) => (
                         <button
                           key={option.id}
                           onClick={() => { setViewMode(option.id); setIsViewMenuOpen(false); }}
-                          className="w-full text-left px-4 py-2.5 text-sm hover:bg-[#1C2230] flex items-center justify-between group transition-colors rounded-lg"
+                          className={cn(
+                            "w-full text-left px-4 py-2.5 text-sm flex items-center justify-between group transition-colors rounded-lg",
+                            viewMode === option.id ? "bg-[#1C2230]/80" : "hover:bg-[#1C2230]",
+                          )}
                         >
                           <span className={cn(
                             "font-medium",

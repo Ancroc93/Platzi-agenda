@@ -1,9 +1,51 @@
 import { MOCK_EVENTS, PlatziEvent } from '../data/events';
 import { cn } from './EventOverlay';
 import { format } from 'date-fns';
-import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarDays, CheckCircle2 } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { useI18n } from '../context/I18nContext';
+
+type FeaturedCtaState = 'default' | 'added' | 'registered';
+
+const GOOGLE_CALENDAR_BASE_URL = 'https://calendar.google.com/calendar/render';
+
+const pad = (n: number) => String(n).padStart(2, '0');
+
+const toGoogleDateTimeUtc = (d: Date) =>
+  `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
+
+const toGoogleDate = (d: Date) =>
+  `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}`;
+
+const buildGoogleCalendarUrl = (event: PlatziEvent) => {
+  const start = new Date(event.date);
+  const end = new Date(event.date.getTime() + event.durationMinutes * 60_000);
+
+  const details = [
+    event.description,
+    event.instructor ? `Instructor: ${event.instructor}` : null,
+    event.school ? `Escuela: ${event.school}` : null,
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+
+  const params = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: event.title,
+    details,
+  });
+
+  if (event.isAllDay) {
+    // Google usa rango [inicio, fin) para all-day; el fin debe ser exclusivo.
+    const endExclusive = new Date(end);
+    endExclusive.setUTCDate(endExclusive.getUTCDate() + 1);
+    params.set('dates', `${toGoogleDate(start)}/${toGoogleDate(endExclusive)}`);
+  } else {
+    params.set('dates', `${toGoogleDateTimeUtc(start)}/${toGoogleDateTimeUtc(end)}`);
+  }
+
+  return `${GOOGLE_CALENDAR_BASE_URL}?${params.toString()}`;
+};
 
 export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent) => void }) => {
   const { t, dateLocale } = useI18n();
@@ -19,7 +61,7 @@ export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent
       .sort((a, b) => a.date.getTime() - b.date.getTime())
       .slice(0, 4);
   }, []);
-  const [ctaAddedByEventId, setCtaAddedByEventId] = useState<Record<string, boolean>>({});
+  const [ctaStateByEventId, setCtaStateByEventId] = useState<Record<string, FeaturedCtaState>>({});
   const trackRef = useRef<HTMLDivElement>(null);
 
   if (featured.length === 0) return null;
@@ -69,6 +111,8 @@ export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent
         {featured.map((event) => {
           const isPlatziLive = event.category === 'Platzi Live';
           const isLiveNow = event.isLive && event.date <= new Date();
+          const ctaState = ctaStateByEventId[event.id] ?? 'default';
+          const isRegistered = ctaState === 'registered';
           
           return (
             <div 
@@ -92,7 +136,11 @@ export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent
               
               <div className="relative z-10">
                 <div className="flex justify-between items-start mb-4">
-                  {isLiveNow ? (
+                  {isRegistered ? (
+                    <div className="h-3 px-2 bg-white text-black rounded-full text-[8px] font-bold leading-none inline-flex items-center">
+                      Registrado
+                    </div>
+                  ) : isLiveNow ? (
                     <div className="flex items-center gap-1.5 px-3 py-1 bg-[#EF4444] text-white rounded-full text-[11px] font-bold tracking-wide">
                       <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                       {t('live')}
@@ -144,28 +192,42 @@ export const FeaturedEvents = ({ onEventClick }: { onEventClick: (e: PlatziEvent
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCtaAddedByEventId((prev) => ({ ...prev, [event.id]: true }));
-                  }}
-                  className={cn(
-                    "w-full py-2.5 px-3 font-bold text-sm rounded-xl transition-colors shadow-sm",
-                    ctaAddedByEventId[event.id]
-                      ? "bg-[#4B5563] text-white flex items-center justify-between"
-                      : "bg-white hover:bg-slate-200 text-black"
-                  )}
-                >
-                  {ctaAddedByEventId[event.id] ? (
-                    <>
-                      <span>Agregar</span>
-                      <CalendarDays className="w-4 h-4 shrink-0" />
-                    </>
-                  ) : (
-                    'Regístrate gratis'
-                  )}
-                </button>
+                {isRegistered ? (
+                  <div className="w-full py-1 text-white font-bold text-xs leading-none flex items-center gap-1.5">
+                    <span>Asistiré</span>
+                    <CheckCircle2 className="w-3 h-3 text-[#00ED80] shrink-0" />
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCtaStateByEventId((prev) => {
+                        const current = prev[event.id] ?? 'default';
+                        if (current === 'added') {
+                          window.open(buildGoogleCalendarUrl(event), '_blank', 'noopener,noreferrer');
+                          return { ...prev, [event.id]: 'registered' };
+                        }
+                        return { ...prev, [event.id]: 'added' };
+                      });
+                    }}
+                    className={cn(
+                      "w-full py-2.5 px-3 font-bold text-sm rounded-xl transition-colors shadow-sm",
+                      ctaState === 'added'
+                        ? "bg-[#0A0F18] border border-[#1D293D] text-white hover:bg-[#131A28] flex items-center justify-center gap-3"
+                        : "bg-white hover:bg-slate-200 text-black"
+                    )}
+                  >
+                    {ctaState === 'added' ? (
+                      <>
+                        <span className="font-bold tracking-tight">Agregar</span>
+                        <CalendarDays className="w-5 h-5 text-white shrink-0" strokeWidth={2.2} />
+                      </>
+                    ) : (
+                      'Regístrate gratis'
+                    )}
+                  </button>
+                )}
               </div>
             </div>
           );
